@@ -31,11 +31,22 @@ Oyun düzenleme modu ile başlar. Haritayı ve tuzakları düzenleyin, sonra ESC
 
 ## Özellikler
 
-- AI kontrollü sürü ajanları (Lemler: 50 adet, yavaş hareket)
+- AI kontrollü sürü ajanları (Lemler: 50 adet, yavaş hareket - hız 0.5)
 - Duygu matrisi ve öğrenme sistemi
 - Çok katmanlı harita sistemi
 - Gerçek zamanlı tuzak yerleştirme (sınırlı sayılarda)
-- Ses efektleri ve arka plan müziği (.sid uzantılı müzikler için .wav/.mp3'ye dönüştürün)
+- Ses efektleri ve arka plan müziği (.sid uzantılı müzikler için sidplayfp.exe kullanılır)
+- Düzenleme modu: Oyun başlamadan harita ve tuzakları düzenleme
+- Çıkış sistemi: Çıkış oku düzenlemede yerleştirilir, oyun başlayınca kapıya dönüşür
+
+## Test Durumu ✅
+
+- **Düzenleme Modu:** Çalışıyor, harita render ediliyor, araç yerleştirme hazır
+- **Araç Limitleri:** Kodda uygulandı (Mancınık 5, Ayna 5, Bariyer 10, Ateş 5, Çıkış Oku 1)
+- **Lem Sistemi:** 50 ajan, yavaş hız (0.5) ayarlandı
+- **Çıkış Sistemi:** Oku kapıya çevirme kodu eklendi
+- **Ses:** SID müzik çalışıyor, basit ses efektleri üretiliyor
+- **Sonraki:** Tam oyun döngüsü testi ve dengeler
 
 ## Araç Sayıları
 
