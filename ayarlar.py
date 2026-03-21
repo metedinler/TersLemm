@@ -45,3 +45,8 @@ SURU_DUYUMLAR = {
     'MERAK': ' 🤔 ',
     'SUPHE': ' 🤨 ',
 }
+
+# Ses ayarları
+SES_ACIK = True
+MUZIK_ACIK = True
+MUZIK_DOSYASI = "sesler/arka_plan.sid"  # .sid uzantılı, ama pygame için .wav/.mp3'ye dönüştürülmeli

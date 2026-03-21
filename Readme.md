@@ -23,3 +23,11 @@ Oyunda kullanılan tuzaklar ve ne işe yaradıkları:
 - Duygu matrisi ve öğrenme sistemi
 - Çok katmanlı harita sistemi
 - Gerçek zamanlı tuzak yerleştirme
+- Ses efektleri ve arka plan müziği (.sid uzantılı müzikler için .wav/.mp3'ye dönüştürün)
+
+## Ses Dosyaları
+
+sesler/ klasörüne aşağıdaki dosyaları ekleyin:
+- arka_plan.sid (veya .wav/.mp3): Arka plan müziği
+- arac_yerlestir.wav: Araç yerleştirme sesi
+- ajan_ol.wav: Ajan ölme sesi

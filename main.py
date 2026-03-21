@@ -5,6 +5,19 @@ from ayarlar import *
 from harita_yoneticisi import HaritaYoneticisi, Mancinik
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
 
+# Ses sistemi başlat
+pygame.mixer.init()
+if MUZIK_ACIK:
+    try:
+        pygame.mixer.music.load(MUZIK_DOSYASI)
+        pygame.mixer.music.play(-1)  # Sonsuz döngü
+    except:
+        print(".sid müzik dosyası bulunamadı veya desteklenmiyor. .wav/.mp3'ye dönüştürün.")
+
+# Ses efektleri (placeholder, gerçek dosyalar eklenecek)
+ses_arac_yerlestir = None  # pygame.mixer.Sound("sesler/arac_yerlestir.wav")
+ses_ajan_ol = None  # pygame.mixer.Sound("sesler/ajan_ol.wav")
+
 class OyunYoneticisi:
     def __init__(self, suru_yon):
         self.suru_yon = suru_yon
@@ -21,6 +34,8 @@ class OyunYoneticisi:
             if ajan.can <= 0:
                 self.olenler += 1
                 self.suru_yon.ajanlar.remove(ajan)
+                if SES_ACIK and ses_ajan_ol:
+                    ses_ajan_ol.play()
                 continue
             # Çıkış kontrolü
             parsel = self.suru_yon.harita.map_grid[ajan.z][ajan.y][ajan.x]
@@ -103,6 +118,8 @@ def main():
                         parsel = harita_yon.map_grid[harita_yon.aktif_katman][grid_y][grid_x]
                         if parsel.uzerindeki_alet is None:
                             parsel.uzerindeki_alet = Mancinik(grid_x, grid_y, harita_yon.aktif_katman, 'sert')
+                            if SES_ACIK and ses_arac_yerlestir:
+                                ses_arac_yerlestir.play()
 
         # B. Oyun Mantığını Güncelle (Update)
         # Araç etkilerini uygula
