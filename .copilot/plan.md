@@ -36,6 +36,6 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 - Görsel: Text-mode, emoji tabanlı.
 
 **Gelecek Adımlar**
-1. AI derinliğini artır: Daha karmaşık karar ağacı, kolektif zeka.
-2. Seviye editörü ekle: Harita oluşturma aracı.
+1. AI derinliğini artır: Daha karmaşık karar ağacı, kolektif zeka. (Tamamlandı: Kolektif zeka eklendi.)
+2. Seviye editörü ekle: Harita oluşturma aracı. (Tamamlandı: seviye_editörü.py eklendi.)
 3. Ses efektleri ve müzik: Atmosfer güçlendirme.

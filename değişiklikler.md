@@ -17,3 +17,9 @@ Bu dosya programdaki tüm değişiklikleri kaydeder.
 
 - AI kararları geliştirildi: Duygu matrisi ve öğrenme algoritmaları implement edildi. Lider AI engelleri algılıyor, duygulara göre karar veriyor, hayatta kalan ajanlar beceri kazanıyor.
 - programcınınelkıtabı.md yeni metotlarla güncellendi.
+
+## [Tarih: 21 Mart 2026 - AI ve Seviye Geliştirmesi]
+
+- AI derinliği artırıldı: Kolektif zeka eklendi, liderler ortalama korkuya göre karar veriyor.
+- Seviye editörü eklendi: seviye_editörü.py ile harita düzenleme aracı.
+- Tuzaklar belirlenip Readme.md'ye eklendi: Mancınık, Sendeletme Taşı, Gizli Çukur, Kıyma Makinesi, Yönlendirici işlevleri tanımlandı.

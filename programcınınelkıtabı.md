@@ -20,6 +20,9 @@ Harita sınıfları ve yönetim.
 ### suru_yoneticisi.py
 Sürü ajanları ve hareket mantığı.
 
+### seviye_editörü.py
+Harita düzenleme aracı.
+
 ### main.py
 Ana oyun döngüsü.
 
