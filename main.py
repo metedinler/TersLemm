@@ -4,15 +4,28 @@ import sys
 from ayarlar import *
 from harita_yoneticisi import HaritaYoneticisi, Mancinik
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
+from sid_player import SidMusicManager
 
 # Ses sistemi başlat
 pygame.mixer.init()
-if MUZIK_ACIK:
-    try:
-        pygame.mixer.music.load(MUZIK_DOSYASI)
-        pygame.mixer.music.play(-1)  # Sonsuz döngü
-    except:
-        print(".sid müzik dosyası bulunamadı veya desteklenmiyor. .wav/.mp3'ye dönüştürün.")
+
+# SID müzik yöneticisi
+sid_manager = SidMusicManager(
+    root_dir=".",
+    memory_dir="sesler",
+    sid_dir="sesler",
+    player_cmd="sidplayfp"
+)
+if MUZIK_ACIK and sid_manager.available:
+    sid_manager.start()
+else:
+    print("SID müzik kullanılamıyor, pygame fallback kullanılacak.")
+    if MUZIK_ACIK:
+        try:
+            pygame.mixer.music.load(MUZIK_DOSYASI.replace(".sid", ".wav"))  # Fallback
+            pygame.mixer.music.play(-1)
+        except:
+            print("Fallback müzik de bulunamadı.")
 
 # Ses efektleri (placeholder, gerçek dosyalar eklenecek)
 ses_arac_yerlestir = None  # pygame.mixer.Sound("sesler/arac_yerlestir.wav")
@@ -127,6 +140,9 @@ def main():
         # Sürünün beyni burada çalışıyor, lider karar veriyor, kuyruk takip ediyor.
         suru_yon.guncelle()
         oyun_yon.guncelle()
+        # SID müzik güncelle
+        if sid_manager.available:
+            sid_manager.update()
 
         # C. Ekrana Çiz (Render)
         # Önce haritayı, onun üstüne de sürüyü çiziyoruz.
@@ -138,6 +154,8 @@ def main():
         clock.tick(FPS)       # Döngü hızını sabitle
 
     # --- 5. Çıkış ---
+    if sid_manager.available:
+        sid_manager.stop()
     pygame.quit()
     sys.exit()
 

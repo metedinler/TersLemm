@@ -4,7 +4,7 @@
 
 1. Program dili Türkçe dir. değişkenler, veri yapıları, veritabanları, sınıfların, metotların , bagımsız fonksıyonların adları Türkçe olacaktır.
 
-2. program tasarım ve planlarına ve kurallarına kesinlikle uyulacaktır.
+2. program tasarım ve planlarına ve kurallarına kesinlikle uyulacaktır. hıcbır sekılde sahte kod yazılmayacaktırç her ne ad altında olursa olsun kesınlıkle yapılmayacaktırç yanı pseudoö dump, placeholder, temp vs olmayacaktır, varsayımlar ve bılınmeyenler sorulacak planın eksıklıklerı tamamlanacak ve plan.md'ye sadece eklemeler yapilarak yazilacaktir. sadece biten plan maddeleri bitti olarak isaretlenecektir. bu sekilde uygulanmayan isler bilinir.
 
 3. programda modüller silinmeyecektir. sılınması gereken moduller kullanılmayanlar dızınıne kaldırılır, kullanılmayanlar dızını calısma klasorunde gurultu yapmaması ıcın calısma dızını dısında olmalıdır.
 

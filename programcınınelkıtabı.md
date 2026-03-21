@@ -24,7 +24,12 @@ Sürü ajanları ve hareket mantığı.
 Harita düzenleme aracı.
 
 ### main.py
-Ana oyun döngüsü, ses sistemi (pygame.mixer ile müzik ve efektler).
+Ana oyun döngüsü, ses sistemi (pygame.mixer ile efektler, SidMusicManager ile SID müzik).
+
+#### SidMusicManager (sid_player.py'den)
+SID müzik çalma yöneticisi.
+- Özellikler: root_dir, memory_dir, sid_dir, player_cmd, playlist, current_index, process, available
+- Metotlar: rebuild_playlist() - .sid dosyalarını tarar, play_index(index) - Belirtilen şarkıyı çalar, update() - Müzik durumunu günceller, stop() - Müzik durdurur.
 
 ## Sınıflar ve Metotlar
 
