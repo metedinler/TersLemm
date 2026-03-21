@@ -24,18 +24,26 @@ Oyun düzenleme modu ile başlar. Haritayı ve tuzakları düzenleyin, sonra ESC
 
 **Düzenleme Modu Kontrolleri:**
 - Fare sol tıklama: Araç yerleştir
-- 1-4: Araç seç (1: Mancınık, 2: Ayna, 3: Bariyer, 4: Ateş)
+- 1-5: Araç seç (1: Mancınık, 2: Ayna, 3: Bariyer, 4: Ateş, 5: Çıkış Oku)
 - Yukarı/Aşağı ok: Katman değiştir
 - S: Kaydet
 - ESC: Oyunu başlat
 
 ## Özellikler
 
-- AI kontrollü sürü ajanları
+- AI kontrollü sürü ajanları (Lemler: 50 adet, yavaş hareket)
 - Duygu matrisi ve öğrenme sistemi
 - Çok katmanlı harita sistemi
-- Gerçek zamanlı tuzak yerleştirme
+- Gerçek zamanlı tuzak yerleştirme (sınırlı sayılarda)
 - Ses efektleri ve arka plan müziği (.sid uzantılı müzikler için .wav/.mp3'ye dönüştürün)
+
+## Araç Sayıları
+
+- **Mancınık**: 5 adet
+- **Ayna**: 5 adet
+- **Bariyer**: 10 adet
+- **Ateş**: 5 adet
+- **Çıkış Oku**: 1 adet (kenarlarda yerleştirilir, oyun başlayınca kapıya dönüşür)
 
 ## Ses Dosyaları
 

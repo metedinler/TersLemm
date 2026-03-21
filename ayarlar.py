@@ -10,14 +10,15 @@ EKRAN_GENISLIK = HARITA_GENISLIK_PARSEL * PARSEK_BOYUTU
 EKRAN_YUKSEKLIK = HARITA_YUKSEKLIK_PARSEL * PARSEK_BOYUTU
 FPS = 60
 
-# --- RENKLER (ASCII Görünüm İçin) ---
-SIYAH = (0, 0, 0)
-BEYAZ = (255, 255, 255)
-GRI = (100, 100, 100)
-KIRMIZI = (200, 50, 50)
-MAVI = (50, 50, 200)
-YESIL = (50, 200, 50)
-KAHVERENGI = (139, 69, 19)
+# --- OYUN PARAMETRELERİ ---
+AJAN_SAYISI = 50  # Lem sayısı
+AJAN_HIZI = 0.5   # Çok yavaş hareket için
+
+# --- ARAÇ SAYILARI ---
+MANCINIK_SAYISI = 5
+AYNA_SAYISI = 5
+BARIYER_SAYISI = 10
+ATES_SAYISI = 5
 
 # --- HARİTA DOKULARI VE NESNE EMOJİLERİ ---
 # Windows ortamında standart Truetype fontlar emojileri destekler.
@@ -31,6 +32,8 @@ DOKULAR = {
     'KAZILABILIR': ' 🤎 ', # Oyuncu delik açabilir
     'CIKIS_DOGRU': ' ✅ ', # Kazanma kapısı
     'CIKIS_SAHTE': ' ❌ ', # Kaybetme kapısı
+    'CIKIS_KAPI': ' 🚪 ', # Ana çıkış kapısı
+    'CIKIS_OKU': ' ➡️ ', # Düzenleme için çıkış oku
 }
 
 OYUNCU_ALETLERI = {

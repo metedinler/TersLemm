@@ -224,7 +224,16 @@ class Ates(OyuncuAleti):
             if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
                 ajan.can -= 20  # Hasar ver
                 ajan.hiz *= 1.2  # Hızlandır
-                ajan.duygular['korku'] += 0.2  # Korku artır
+                ajan.duygular['korku'] += 0.2
+
+class CikisOku(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'CIKIS_OKU')  # Çıkış oku emoji
+        self.maks_kapasite = 1  # Sadece bir çıkış
+
+    def etki_uygula(self, ajanlar):
+        """Çıkış oku, etki yok, sadece işaret."""
+        pass  # Oyun başlayınca kapıya dönüşür  # Korku artır
 
 # --- 🗄️ HARİTA VERİ YÖNETİCİSİ (Çok Boyutlu Dizi) ---
 
@@ -238,7 +247,15 @@ class HaritaYoneticisi:
                          for _ in range(self.max_katman)]
         self.aktif_katman = 0 # Şu an ekranda görünen kat
 
-    def txt_den_yukle(self, klasor_yolu):
+    def cikis_oklarini_kapiya_cevir(self):
+        """Düzenleme sonrası çıkış oklarını kapıya çevir."""
+        for kat in range(self.max_katman):
+            for y in range(HARITA_YUKSEKLIK_PARSEL):
+                for x in range(HARITA_GENISLIK_PARSEL):
+                    parsel = self.map_grid[kat][y][x]
+                    if parsel.uzerindeki_alet and isinstance(parsel.uzerindeki_alet, CikisOku):
+                        parsel.doku_id = 'CIKIS_KAPI'
+                        parsel.uzerindeki_alet = None  # Araç kaldır, parsel çıkış olsun
         """Örn: bolum_1_kat_0.txt dosyalarını okur, OOP nesnelerini oluşturur."""
         
         # Harita dosyasındaki karakterleri nesne sınıfına eşleyen tablo
@@ -285,7 +302,7 @@ class HaritaYoneticisi:
 
     def render(self, surface, font):
         """Sadece ekranda olan aktif katmanı çizer."""
-        surface.fill(SIYAH) # Ekranı temizle
+        surface.fill((0, 0, 0)) # Ekranı temizle
         katman = self.map_grid[self.aktif_katman]
         
         for satir in katman:

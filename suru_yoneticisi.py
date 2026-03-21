@@ -18,7 +18,7 @@ class SuruAjani:
         
         # 3. TEMEL STATLAR
         self.can = 100.0
-        self.hiz = 1.0  # Parsek geçiş hızı
+        self.hiz = AJAN_HIZI  # Parsek geçiş hızı
         # 4. DUYGU MATRİSİ (0 - 100)
         self.duygular = {
             "korku": 0.0,

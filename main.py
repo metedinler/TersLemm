@@ -2,8 +2,8 @@
 import pygame
 import sys
 import struct
-from ayarlar import *
-from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates
+from ayarlar import *  # AJAN_SAYISI, AJAN_HIZI, araç sayıları dahil
+from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
 from sid_player import SidMusicManager
 
@@ -101,7 +101,7 @@ def duzenleme_modu():
     pygame.init()
     pygame.font.init()
     harita_yon = HaritaYoneticisi()
-    harita_yon.txt_den_yukle("haritalar")
+    # harita_yon.txt_den_yukle("haritalar")  # Şimdilik boş harita
     
     ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
     pygame.display.set_caption("Ters Lemmings - Düzenleme Modu")
@@ -112,8 +112,11 @@ def duzenleme_modu():
     except:
         font = pygame.font.SysFont(None, PARSEK_BOYUTU)
     
-    arac_secimi = 0  # 0: Mancinik, 1: Ayna, 2: Bariyer, 3: Ateş
-    arac_listesi = [Mancinik, Ayna, Bariyer, Ates]
+    arac_secimi = 0  # 0: Mancinik, 1: Ayna, 2: Bariyer, 3: Ateş, 4: Çıkış Oku
+    arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku]
+    arac_adlari = ['Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku']
+    arac_kullanim = {'Mancinik': 0, 'Ayna': 0, 'Bariyer': 0, 'Ates': 0, 'CikisOku': 0}
+    arac_limitleri = {'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI, 'CikisOku': 1}
     
     calisiyor = True
     while calisiyor:
@@ -134,6 +137,8 @@ def duzenleme_modu():
                     arac_secimi = 2
                 elif event.key == pygame.K_4:
                     arac_secimi = 3
+                elif event.key == pygame.K_5:
+                    arac_secimi = 4
                 elif event.key == pygame.K_s:
                     # Kaydet
                     print("Harita kaydedildi.")
@@ -147,20 +152,32 @@ def duzenleme_modu():
                     if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
                         parsel = harita_yon.map_grid[harita_yon.aktif_katman][grid_y][grid_x]
                         if parsel.uzerindeki_alet is None:
-                            arac_sinif = arac_listesi[arac_secimi]
-                            if arac_sinif == Mancinik:
-                                parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman, 'sert')
-                            else:
-                                parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman)
-                            if SES_ACIK and ses_arac_yerlestir:
-                                ses_arac_yerlestir.play()
+                            arac_adi = arac_adlari[arac_secimi]
+                            if arac_kullanim[arac_adi] < arac_limitleri[arac_adi]:
+                                if arac_adi == 'CikisOku':
+                                    # Sadece kenarlarda
+                                    if grid_x == 0 or grid_x == HARITA_GENISLIK_PARSEL-1 or grid_y == 0 or grid_y == HARITA_YUKSEKLIK_PARSEL-1:
+                                        parsel.uzerindeki_alet = CikisOku(grid_x, grid_y, harita_yon.aktif_katman)
+                                        arac_kullanim[arac_adi] += 1
+                                        if SES_ACIK and ses_arac_yerlestir:
+                                            ses_arac_yerlestir.play()
+                                else:
+                                    arac_sinif = arac_listesi[arac_secimi]
+                                    if arac_sinif == Mancinik:
+                                        parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman, 'sert')
+                                    else:
+                                        parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman)
+                                    arac_kullanim[arac_adi] += 1
+                                    if SES_ACIK and ses_arac_yerlestir:
+                                        ses_arac_yerlestir.play()
         
         # Render
         harita_yon.render(ekran, font)
         
         # UI
-        ui_yazi = f"Katman: {harita_yon.aktif_katman} | Araç: {arac_listesi[arac_secimi].__name__} | 1-4: Araç Seç | S: Kaydet | ESC: Oyun Başlat"
-        ui_surf = font.render(ui_yazi, True, MAVI)
+        arac_adi = arac_adlari[arac_secimi]
+        ui_yazi = f"Katman: {harita_yon.aktif_katman} | Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | 1-4: Araç Seç | S: Kaydet | ESC: Oyun Başlat"
+        ui_surf = font.render(ui_yazi, True, (50, 50, 200))
         ekran.blit(ui_surf, (10, EKRAN_YUKSEKLIK - 30))
         
         pygame.display.flip()
@@ -172,6 +189,7 @@ def main():
     # --- 0. Düzenleme Modu ---
     print("Düzenleme modu başlatılıyor...")
     harita_yon = duzenleme_modu()
+    harita_yon.cikis_oklarini_kapiya_cevir()  # Çıkış oklarını kapıya çevir
     
     # --- 1. Başlangıç Ayarları ---
     pygame.init()
@@ -194,7 +212,7 @@ def main():
     suru_yon = SuruYoneticisi(harita_yon)
     
     # Katman 0'da, X=2, Y=5 koordinatlarında 15 kişilik bir sürü yaratalım!
-    suru_yon.suru_yarat(baslangic_x=2, baslangic_y=5, boyut=15)
+    suru_yon.suru_yarat(baslangic_x=2, baslangic_y=5, boyut=AJAN_SAYISI)
 
     # --- 4. Oyun Yöneticisini Başlat ---
     oyun_yon = OyunYoneticisi(suru_yon)
