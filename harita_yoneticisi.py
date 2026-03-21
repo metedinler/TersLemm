@@ -169,6 +169,63 @@ class Yonlendirici(OyuncuAleti):
                 # Belirli bir yöne yönlendir, örneğin sağa
                 ajan.yon = 'sag'
 
+class Ayna(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'AYNA')  # Ayna emoji
+        self.maks_kapasite = 15
+
+    def etki_uygula(self, ajanlar):
+        """Ajanların yönünü ters çevirir."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+                # Yönü ters çevir (180 derece)
+                if ajan.yon == 'sag':
+                    ajan.yon = 'sol'
+                elif ajan.yon == 'sol':
+                    ajan.yon = 'sag'
+                elif ajan.yon == 'yukari':
+                    ajan.yon = 'asagi'
+                elif ajan.yon == 'asagi':
+                    ajan.yon = 'yukari'
+                ajan.duygular['korku'] += 0.1  # Korku artır
+
+class Bariyer(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'BARIYER')  # Bariyer emoji
+        self.maks_kapasite = 30
+
+    def etki_uygula(self, ajanlar):
+        """Engel koyar, ajanları yavaşlatır."""
+        if not self.kullan():
+            return
+        # Bariyer yerleştirildiğinde parseli engel yap
+        parsel = self.harita_yon.map_grid[self.z][self.y][self.x]
+        if parsel:
+            parsel.yurunebilir = False
+            parsel.doku_id = 'BARIYER'
+        # Yakındaki ajanları yavaşlat
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+                ajan.hiz *= 0.8  # Yavaşlat
+                ajan.duygular['suphe'] += 0.1
+
+class Ates(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'ATES')  # Ateş emoji
+        self.maks_kapasite = 10
+
+    def etki_uygula(self, ajanlar):
+        """Ajanları yakar, hasar verir ve hızlandırır."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+                ajan.can -= 20  # Hasar ver
+                ajan.hiz *= 1.2  # Hızlandır
+                ajan.duygular['korku'] += 0.2  # Korku artır
+
 # --- 🗄️ HARİTA VERİ YÖNETİCİSİ (Çok Boyutlu Dizi) ---
 
 class HaritaYoneticisi:

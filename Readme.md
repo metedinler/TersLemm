@@ -10,12 +10,24 @@ Oyunda kullanılan tuzaklar ve ne işe yaradıkları:
 - **Gizli Çukur**: Ajanları öldürür. Üzerine basan ajanı anında öldürür.
 - **Kıyma Makinesi**: Ajanları öldürür. Üzerine basan ajanı anında öldürür.
 - **Yönlendirici**: Ajanların yönünü değiştirir. Belirli bir yöne yönlendirir, örneğin sağa.
+- **Ayna**: Ajanların yönünü ters çevirir. Korku duygusunu yükseltir.
+- **Bariyer**: Engel koyar, ajanları yavaşlatır. Şüphe duygusunu yükseltir.
+- **Ateş**: Ajanları yakar, hasar verir ve hızlandırır. Korku duygusunu yükseltir.
 
 ## Kurulum ve Çalıştırma
 
 1. Python 3.12+ kurulu olduğundan emin olun.
 2. Gerekli paketleri yükleyin: `pip install pygame`
 3. Oyunu çalıştırın: `python main.py`
+
+Oyun düzenleme modu ile başlar. Haritayı ve tuzakları düzenleyin, sonra ESC ile oyunu başlatın.
+
+**Düzenleme Modu Kontrolleri:**
+- Fare sol tıklama: Araç yerleştir
+- 1-4: Araç seç (1: Mancınık, 2: Ayna, 3: Bariyer, 4: Ateş)
+- Yukarı/Aşağı ok: Katman değiştir
+- S: Kaydet
+- ESC: Oyunu başlat
 
 ## Özellikler
 
