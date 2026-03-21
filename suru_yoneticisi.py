@@ -180,6 +180,14 @@ class SuruYoneticisi:
         """Gelişmiş AI: Duygular, engeller ve tuzaklar dikkate alınarak karar verir."""
         import random
         
+        # Kolektif zeka: Diğer liderlerin duygularını kontrol et
+        toplam_korku = sum(l.korku for l in self.liderler)
+        ortalama_korku = toplam_korku / len(self.liderler) if self.liderler else 0
+        
+        # Eğer ortalama korku yüksekse, tüm liderler daha temkinli olur
+        if ortalama_korku > 60:
+            lider.duygular["korku"] = min(100, lider.duygular["korku"] + 20)
+        
         # 1. Duygulara göre temel karar
         korku = lider.duygular["korku"]
         merak = lider.duygular["merak"]

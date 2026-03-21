@@ -2,7 +2,7 @@
 
 Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü karar verir ve zincirleme takip eder. Çok katmanlı harita, duygu matrisi, öğrenme sistemi ile özgün bir deneyim.
 
-**Steps**
+**Adımlar**
 1. Kod yapısını analiz et: Gemini konuşmasındaki Python sınıflarını incele, OOP mimarisini anla.
 2. Proje yapısını oluştur: ters_lemmings klasörü, main.py, ayarlar.py, harita_yoneticisi.py, suru_yoneticisi.py dosyalarını oluştur.
 3. Harita sistemini implement et: Çok boyutlu dizi, pasif nesneler, .txt'den yükleme.
@@ -14,20 +14,20 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 9. AI kararlarını geliştir: Duygu matrisi ve öğrenme algoritmalarını implement et. (Tamamlandı: Lider AI duygulara göre karar veriyor, öğrenme sistemi eklendi.)
 10. Test et ve geliştir: Hareketi test et, AI kararlarını geliştir, seviye tasarımı ekle.
 
-**Relevant files**
+**İlgili Dosyalar**
 - `main.py` — Ana oyun döngüsü ve motor.
 - `ayarlar.py` — Sabitler, renkler, emojiler.
 - `harita_yoneticisi.py` — Harita OOP sınıfları, yükleme.
 - `suru_yoneticisi.py` — Sürü sınıfları, hareket matematiği.
 
-**Verification**
+**Doğrulama**
 1. Haritayı .txt'den yükle ve ekranda göster.
 2. Sürüyü yarat ve zincirleme hareket ettir.
 3. Fare ile araç yerleştir ve etkilerini test et.
 4. AI kararlarını test et, öğrenmeyi doğrula.
 5. Kazanma/kaybetme koşullarını test et.
 
-**Decisions**
+**Kararlar**
 - Tema: Evrimsel Laboratuvar / Sentetik Test Odası.
 - Kazanma: %90 ölüm veya sahte kapıya yönlendirme.
 - Kaybetme: %10'dan fazla doğru kapıya ulaşma.
@@ -35,7 +35,7 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 - Kod dili: Python + Pygame.
 - Görsel: Text-mode, emoji tabanlı.
 
-**Further Considerations**
+**Gelecek Adımlar**
 1. AI derinliğini artır: Daha karmaşık karar ağacı, kolektif zeka.
 2. Seviye editörü ekle: Harita oluşturma aracı.
 3. Ses efektleri ve müzik: Atmosfer güçlendirme.
