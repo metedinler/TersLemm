@@ -3,7 +3,7 @@ import pygame
 import sys
 import struct
 from ayarlar import *  # AJAN_SAYISI, AJAN_HIZI, araç sayıları dahil
-from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku
+from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku, ZeminDuz
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
 from sid_player import SidMusicManager
 
@@ -101,7 +101,11 @@ def duzenleme_modu():
     pygame.init()
     pygame.font.init()
     harita_yon = HaritaYoneticisi()
-    # harita_yon.txt_den_yukle("haritalar")  # Şimdilik boş harita
+    # Haritayı boş olarak başlat (tüm katmanları ZeminDuz ile doldur)
+    for kat in range(harita_yon.max_katman):
+        for y in range(HARITA_YUKSEKLIK_PARSEL):
+            for x in range(HARITA_GENISLIK_PARSEL):
+                harita_yon.map_grid[kat][y][x] = ZeminDuz(x, y, kat)
     
     ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
     pygame.display.set_caption("Ters Lemmings - Düzenleme Modu")

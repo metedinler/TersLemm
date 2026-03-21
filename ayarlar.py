@@ -20,7 +20,13 @@ AYNA_SAYISI = 5
 BARIYER_SAYISI = 10
 ATES_SAYISI = 5
 
-# --- HARİTA DOKULARI VE NESNE EMOJİLERİ ---
+# --- RENK TANIMLARI ---
+SIYAH = (0, 0, 0)
+BEYAZ = (255, 255, 255)
+GRI = (128, 128, 128)
+KIRMIZI = (255, 0, 0)
+YESIL = (0, 255, 0)
+MAVI = (0, 0, 255)
 # Windows ortamında standart Truetype fontlar emojileri destekler.
 # Eğer özel pixel font kullanırsan bu karakterleri o fontta tasarlaman gerekir.
 DOKULAR = {
