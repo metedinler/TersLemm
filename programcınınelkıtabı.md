@@ -24,7 +24,7 @@ Sürü ajanları ve hareket mantığı.
 Harita düzenleme aracı.
 
 ### main.py
-Ana oyun döngüsü.
+Ana oyun döngüsü, ses sistemi (pygame.mixer ile müzik ve efektler).
 
 ## Sınıflar ve Metotlar
 

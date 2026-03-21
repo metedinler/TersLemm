@@ -23,3 +23,10 @@ Bu dosya programdaki tüm değişiklikleri kaydeder.
 - AI derinliği artırıldı: Kolektif zeka eklendi, liderler ortalama korkuya göre karar veriyor.
 - Seviye editörü eklendi: seviye_editörü.py ile harita düzenleme aracı.
 - Tuzaklar belirlenip Readme.md'ye eklendi: Mancınık, Sendeletme Taşı, Gizli Çukur, Kıyma Makinesi, Yönlendirici işlevleri tanımlandı.
+
+## [Tarih: 21 Mart 2026 - Ses Sistemi]
+
+- Ses efektleri ve müzik eklendi: Pygame mixer ile ses sistemi implement edildi.
+- .sid uzantılı müzikler için destek (dönüştürme gerekli, pygame .sid desteklemez).
+- Araç yerleştirme ve ajan ölme sesleri eklendi.
+- Readme.md ses dosyaları bilgisi ile güncellendi.

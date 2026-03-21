@@ -38,4 +38,4 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 **Gelecek Adımlar**
 1. AI derinliğini artır: Daha karmaşık karar ağacı, kolektif zeka. (Tamamlandı: Kolektif zeka eklendi.)
 2. Seviye editörü ekle: Harita oluşturma aracı. (Tamamlandı: seviye_editörü.py eklendi.)
-3. Ses efektleri ve müzik: Atmosfer güçlendirme.
+3. Ses efektleri ve müzik: Atmosfer güçlendirme. (Tamamlandı: Pygame mixer ile ses sistemi eklendi.)
