@@ -3,7 +3,7 @@ import pygame
 import sys
 import struct
 from ayarlar import *  # AJAN_SAYISI, AJAN_HIZI, araç sayıları dahil
-from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku, ZeminDuz
+from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku, ZeminDuz, SahteYol
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
 from sid_player import SidMusicManager
 
@@ -116,11 +116,11 @@ def duzenleme_modu():
     except:
         font = pygame.font.SysFont(None, PARSEK_BOYUTU)
     
-    arac_secimi = 0  # 0: Mancinik, 1: Ayna, 2: Bariyer, 3: Ateş, 4: Çıkış Oku
-    arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku]
-    arac_adlari = ['Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku']
-    arac_kullanim = {'Mancinik': 0, 'Ayna': 0, 'Bariyer': 0, 'Ates': 0, 'CikisOku': 0}
-    arac_limitleri = {'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI, 'CikisOku': 1}
+    arac_secimi = 0  # 0: Mancinik, 1: Ayna, 2: Bariyer, 3: Ateş, 4: Çıkış Oku, 5: Sahte Yol
+    arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol]
+    arac_adlari = ['Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku', 'SahteYol']
+    arac_kullanim = {'Mancinik': 0, 'Ayna': 0, 'Bariyer': 0, 'Ates': 0, 'CikisOku': 0, 'SahteYol': 0}
+    arac_limitleri = {'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI, 'CikisOku': CIKIS_OKU_SAYISI, 'SahteYol': SAHTE_YOL_SAYISI}
     
     calisiyor = True
     while calisiyor:
@@ -143,6 +143,8 @@ def duzenleme_modu():
                     arac_secimi = 3
                 elif event.key == pygame.K_5:
                     arac_secimi = 4
+                elif event.key == pygame.K_6:
+                    arac_secimi = 5
                 elif event.key == pygame.K_s:
                     # Kaydet
                     print("Harita kaydedildi.")
@@ -180,7 +182,7 @@ def duzenleme_modu():
         
         # UI
         arac_adi = arac_adlari[arac_secimi]
-        ui_yazi = f"Katman: {harita_yon.aktif_katman} | Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | 1-4: Araç Seç | S: Kaydet | ESC: Oyun Başlat"
+        ui_yazi = f"Katman: {harita_yon.aktif_katman} | Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | 1-6: Araç Seç | S: Kaydet | ESC: Oyun Başlat"
         ui_surf = font.render(ui_yazi, True, (50, 50, 200))
         ekran.blit(ui_surf, (10, EKRAN_YUKSEKLIK - 30))
         
@@ -208,15 +210,13 @@ def main():
     except:
         oyun_fontu = pygame.font.SysFont(None, PARSEK_BOYUTU)
 
-    # --- 2. Haritayı Yükle ---
-    harita_yon = HaritaYoneticisi()
-    harita_yon.txt_den_yukle("haritalar")
+    # --- 2. Harita zaten düzenleme modunda oluşturuldu ---
 
     # --- 3. Sürü Yöneticisini Başlat ve Sürüyü Doğur ---
     suru_yon = SuruYoneticisi(harita_yon)
     
-    # Katman 0'da, X=2, Y=5 koordinatlarında 15 kişilik bir sürü yaratalım!
-    suru_yon.suru_yarat(baslangic_x=2, baslangic_y=5, boyut=AJAN_SAYISI)
+    # Giriş noktasında sürüyü yarat
+    suru_yon.suru_yarat(baslangic_x=harita_yon.giris_x, baslangic_y=harita_yon.giris_y, boyut=AJAN_SAYISI)
 
     # --- 4. Oyun Yöneticisini Başlat ---
     oyun_yon = OyunYoneticisi(suru_yon)

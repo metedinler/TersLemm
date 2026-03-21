@@ -15,10 +15,12 @@ AJAN_SAYISI = 50  # Lem sayısı
 AJAN_HIZI = 0.5   # Çok yavaş hareket için
 
 # --- ARAÇ SAYILARI ---
-MANCINIK_SAYISI = 5
-AYNA_SAYISI = 5
-BARIYER_SAYISI = 10
-ATES_SAYISI = 5
+MANCINIK_SAYISI = 20  # Artırıldı
+AYNA_SAYISI = 20      # Artırıldı
+BARIYER_SAYISI = 30   # Artırıldı
+ATES_SAYISI = 20      # Artırıldı
+SAHTE_YOL_SAYISI = 15 # Yeni araç
+CIKIS_OKU_SAYISI = 1
 
 # --- RENK TANIMLARI ---
 SIYAH = (0, 0, 0)
@@ -33,18 +35,30 @@ DOKULAR = {
     'ZEMIN_DUZ': ' . ',  # Yürünür
     'DUVAR_KAYA': ' 🧱 ', # Yürünmez
     'SU_GOL': ' 💧 ',    # Boğulur
+    'DENIZ': ' 🌊 ',     # Boğulur, daha derin
     'DAG': ' ⛰️ ',     # Yavaşlatır
-    'ORMAN': ' 🌳 ',    # Görüşü azaltır
+    'DIK_DAG': ' 🏔️ ',  # Çok yavaşlatır, tırmanılmaz
+    'ORMAN': ' 🌳 ',    # Görüşü azaltır, yavaşlatır
+    'SIKI_ORMAN': ' 🌲 ', # Daha yavaş, görüş az
+    'YOL': ' 🛤️ ',      # Hızlı yürünür
+    'TAS_DUVAR': ' 🧱 ', # Yürünmez
+    'OVA': ' 🌾 ',      # Normal
+    'PLATO': ' 🏞️ ',    # Yüksek, yavaş
+    'CALILIK': ' 🌿 ',   # Yavaşlatır
+    'TASLIK': ' 🪨 ',   # Yavaşlatır
+    'COL': ' 🏜️ ',     # Çok yavaş, susuz
     'KAZILABILIR': ' 🤎 ', # Oyuncu delik açabilir
     'CIKIS_DOGRU': ' ✅ ', # Kazanma kapısı
     'CIKIS_SAHTE': ' ❌ ', # Kaybetme kapısı
     'CIKIS_KAPI': ' 🚪 ', # Ana çıkış kapısı
     'CIKIS_OKU': ' ➡️ ', # Düzenleme için çıkış oku
+    'SAHTE_YOL': ' 🛣️ ', # Oyuncu yapar, lemler tercih eder
 }
 
 OYUNCU_ALETLERI = {
     'MANCINIK': ' 🏹 ',
     'TAS': ' 💎 ',
+    'SAHTE_YOL': ' 🛣️ ',
 }
 
 SURU_DUYUMLAR = {

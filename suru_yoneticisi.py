@@ -34,6 +34,50 @@ class SuruAjani:
             "tuzak_fark_etme": 0.0,
             "engelden_kacma": 0.0
         }
+        
+        # 6. YOL BULMA
+        self.yol = []  # [(x, y, z), ...] hedefe giden yol
+        self.yol_index = 0
+    
+    def yol_bul(self, harita_yon):
+        """Hedefe yaklaşık yol bul (greedy, en az efor)."""
+        hedef_x, hedef_y, hedef_z = harita_yon.cikis_x, harita_yon.cikis_y, harita_yon.cikis_katman
+        
+        self.yol = []
+        current_x, current_y, current_z = self.x, self.y, self.z
+        max_adim = 200  # Limit
+        visited = set()
+        
+        for _ in range(max_adim):
+            if (current_x, current_y, current_z) in visited:
+                break
+            visited.add((current_x, current_y, current_z))
+            
+            if abs(current_x - hedef_x) + abs(current_y - hedef_y) + abs(current_z - hedef_z) < 2:
+                break  # Yaklaştı
+            
+            # En iyi yönü bul
+            yonler = [(-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)]
+            en_iyi = None
+            en_az_mesafe = float('inf')
+            
+            for dx, dy, dz in yonler:
+                nx, ny, nz = current_x + dx, current_y + dy, current_z + dz
+                if 0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL and 0 <= nz < harita_yon.max_katman:
+                    parsel = harita_yon.map_grid[nz][ny][nx]
+                    if parsel and parsel.yurunebilir and (nx, ny, nz) not in visited:
+                        mesafe = abs(nx - hedef_x) + abs(ny - hedef_y) + abs(nz - hedef_z)
+                        if mesafe < en_az_mesafe:
+                            en_az_mesafe = mesafe
+                            en_iyi = (nx, ny, nz)
+            
+            if en_iyi:
+                self.yol.append(en_iyi)
+                current_x, current_y, current_z = en_iyi
+            else:
+                break
+        
+        self.yol_index = 0
     
     # --- BECERİ VE ÖĞRENME METOTLARI ---
 
@@ -168,7 +212,7 @@ class SuruYoneticisi:
 
             # 2. Aşama: Liderler karar verir ve hareket eder
             for lider in self.liderler:
-                self.lider_yapay_zeka(lider)
+                self.lider_yapay_zeka(lider, self.harita)
 
             # 3. Aşama: Takipçiler sadece önündekinin "eski" konumuna geçer
             for ajan in self.ajanlar:
@@ -176,9 +220,21 @@ class SuruYoneticisi:
                     ajan.x = ajan.onumdeki_ajan.eski_x
                     ajan.y = ajan.onumdeki_ajan.eski_y
 
-    def lider_yapay_zeka(self, lider):
+    def lider_yapay_zeka(self, lider, harita_yon):
         """Gelişmiş AI: Duygular, engeller ve tuzaklar dikkate alınarak karar verir."""
         import random
+        
+        # Yol bulma
+        if not lider.yol or lider.yol_index >= len(lider.yol):
+            lider.yol_bul(harita_yon)
+        
+        if lider.yol and lider.yol_index < len(lider.yol):
+            hedef_x, hedef_y, hedef_z = lider.yol[lider.yol_index]
+            lider.x, lider.y, lider.z = hedef_x, hedef_y, hedef_z
+            lider.yol_index += 1
+            return  # Yol takip et, eski mantık kullanma
+        
+        # Eski mantık devam
         
         # Kolektif zeka: Diğer liderlerin duygularını kontrol et
         toplam_korku = sum(l.korku for l in self.liderler)

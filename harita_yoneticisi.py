@@ -64,6 +64,57 @@ class SuGol(Parsel):
         self.bogulma_riski = True
         self.yavaslatma_katsayisi = 1.8 # Suda yürümek/yüzmek yavaştır
 
+class Deniz(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'DENIZ')
+        self.bogulma_riski = True
+        self.yavaslatma_katsayisi = 2.0 # Derin su, daha yavaş
+
+class SikiOrman(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'SIKI_ORMAN')
+        self.yavaslatma_katsayisi = 1.5 # Sık orman, yavaş
+
+class Yol(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'YOL')
+        self.yavaslatma_katsayisi = 0.8 # Yol, hızlı
+
+class TasDuvar(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'TAS_DUVAR')
+        self.yurunebilir = False
+
+class Ova(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'OVA')
+        # Normal
+
+class Plato(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'PLATO')
+        self.yavaslatma_katsayisi = 1.2 # Yüksek yer, biraz yavaş
+
+class DikDag(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'DIK_DAG')
+        self.yurunebilir = False  # Tırmanılmaz
+
+class Calilik(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'CALILIK')
+        self.yavaslatma_katsayisi = 1.3 # Çalılık, yavaş
+
+class Taslik(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'TASLIK')
+        self.yavaslatma_katsayisi = 1.4 # Taşlık, yavaş
+
+class Col(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'COL')
+        self.yavaslatma_katsayisi = 1.6 # Çöl, çok yavaş
+
 # --- OYUNCU ALETLERİ ---
 
 class OyuncuAleti:
@@ -107,7 +158,7 @@ class Mancinik(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
                 # Rastgele yön değiştir
                 import random
                 ajan.yon = random.choice(['yukari', 'asagi', 'sol', 'sag'])
@@ -124,7 +175,7 @@ class SendeletmeTasi(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
                 import random
                 ajan.yon = random.choice(['yukari', 'asagi', 'sol', 'sag'])
                 ajan.hiz *= 0.5  # Yavaşlat
@@ -165,7 +216,7 @@ class Yonlendirici(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
                 # Belirli bir yöne yönlendir, örneğin sağa
                 ajan.yon = 'sag'
 
@@ -179,7 +230,7 @@ class Ayna(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
                 # Yönü ters çevir (180 derece)
                 if ajan.yon == 'sag':
                     ajan.yon = 'sol'
@@ -207,7 +258,7 @@ class Bariyer(OyuncuAleti):
             parsel.doku_id = 'BARIYER'
         # Yakındaki ajanları yavaşlat
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
                 ajan.hiz *= 0.8  # Yavaşlat
                 ajan.duygular['suphe'] += 0.1
 
@@ -221,7 +272,7 @@ class Ates(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
                 ajan.can -= 20  # Hasar ver
                 ajan.hiz *= 1.2  # Hızlandır
                 ajan.duygular['korku'] += 0.2
@@ -234,7 +285,14 @@ class CikisOku(OyuncuAleti):
     def etki_uygula(self, ajanlar):
         """Çıkış oku, etki yok, sadece işaret."""
         pass  # Oyun başlayınca kapıya dönüşür  # Korku artır
+class SahteYol(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'SAHTE_YOL')  # Sahte yol emoji
+        self.maks_kapasite = 50  # Sürekli
 
+    def etki_uygula(self, ajanlar):
+        """Sahte yol, etki yok, sadece yol gibi davranır."""
+        pass  # Lemler yolları tercih eder
 # --- 🗄️ HARİTA VERİ YÖNETİCİSİ (Çok Boyutlu Dizi) ---
 
 class HaritaYoneticisi:
@@ -246,6 +304,69 @@ class HaritaYoneticisi:
                           for _ in range(HARITA_YUKSEKLIK_PARSEL)] 
                          for _ in range(self.max_katman)]
         self.aktif_katman = 0 # Şu an ekranda görünen kat
+        
+        # Rastgele giriş/çıkış
+        import random
+        self.giris_katman = random.randint(0, self.max_katman - 1)
+        self.cikis_katman = random.randint(0, self.max_katman - 1)
+        self.giris_x, self.giris_y = 0, random.randint(0, HARITA_YUKSEKLIK_PARSEL - 1)
+        self.cikis_x, self.cikis_y = HARITA_GENISLIK_PARSEL - 1, random.randint(0, HARITA_YUKSEKLIK_PARSEL - 1)
+        
+        # Haritayı rastgele oluştur
+        self.rastgele_harita_olustur()
+
+    def rastgele_harita_olustur(self):
+        """Rastgele harita oluştur, doğal ortamlar ve yollarla."""
+        import random
+        
+        # Parsel türleri listesi (ağırlıklı)
+        parsel_turleri = [
+            ('ZeminDuz', 30), ('Dag', 10), ('SuGol', 5), ('Deniz', 3), ('SikiOrman', 8),
+            ('Yol', 5), ('TasDuvar', 5), ('Ova', 15), ('Plato', 5), ('DikDag', 3),
+            ('Calilik', 5), ('Taslik', 5), ('Col', 3)
+        ]
+        
+        for kat in range(self.max_katman):
+            for y in range(HARITA_YUKSEKLIK_PARSEL):
+                for x in range(HARITA_GENISLIK_PARSEL):
+                    # Rastgele tür seç (ağırlıklı)
+                    toplam_agirlik = sum(agirlik for _, agirlik in parsel_turleri)
+                    rastgele = random.randint(1, toplam_agirlik)
+                    kumulatif = 0
+                    secilen_tur = 'ZeminDuz'  # Varsayılan
+                    for tur, agirlik in parsel_turleri:
+                        kumulatif += agirlik
+                        if rastgele <= kumulatif:
+                            secilen_tur = tur
+                            break
+                    
+                    # Sınıf eşleşmesi
+                    sinif_eslesme = {
+                        'ZeminDuz': ZeminDuz, 'Dag': Dag, 'SuGol': SuGol, 'Deniz': Deniz,
+                        'SikiOrman': SikiOrman, 'Yol': Yol, 'TasDuvar': TasDuvar,
+                        'Ova': Ova, 'Plato': Plato, 'DikDag': DikDag,
+                        'Calilik': Calilik, 'Taslik': Taslik, 'Col': Col
+                    }
+                    parsel_sinifi = sinif_eslesme.get(secilen_tur, ZeminDuz)
+                    self.map_grid[kat][y][x] = parsel_sinifi(x, y, kat)
+            
+            # Yol oluştur: Girişten çıkışa basit yol
+            if kat == self.giris_katman:
+                # Yatay yol çiz
+                for x in range(self.giris_x, self.cikis_x + 1):
+                    if 0 <= x < HARITA_GENISLIK_PARSEL and 0 <= self.giris_y < HARITA_YUKSEKLIK_PARSEL:
+                        self.map_grid[kat][self.giris_y][x] = Yol(x, self.giris_y, kat)
+            elif kat == self.cikis_katman:
+                # Çıkış katmanında da yol
+                for x in range(self.giris_x, self.cikis_x + 1):
+                    if 0 <= x < HARITA_GENISLIK_PARSEL and 0 <= self.cikis_y < HARITA_YUKSEKLIK_PARSEL:
+                        self.map_grid[kat][self.cikis_y][x] = Yol(x, self.cikis_y, kat)
+        
+        # Giriş ve çıkış ayarla
+        if self.map_grid[self.giris_katman][self.giris_y][self.giris_x]:
+            self.map_grid[self.giris_katman][self.giris_y][self.giris_x].doku_id = 'CIKIS_DOGRU'
+        if self.map_grid[self.cikis_katman][self.cikis_y][self.cikis_x]:
+            self.map_grid[self.cikis_katman][self.cikis_y][self.cikis_x].doku_id = 'CIKIS_SAHTE'
 
     def cikis_oklarini_kapiya_cevir(self):
         """Düzenleme sonrası çıkış oklarını kapıya çevir."""
