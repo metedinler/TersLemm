@@ -70,13 +70,13 @@ Harita yönetim sınıfı.
 
 #### SuruAjani
 Sürü ajanı sınıfı.
-- Özellikler: id, x, y, z, hayatta, onumdeki_ajan, arkamdaki_ajan, lider_mi, can, hiz, duygular, beceriler
-- Metotlar: beceri_ogren(beceri_adi, miktar), suya_gir(zemin_zorlugu), arkaya_bilgi_ilet(beceri_adi, ogretme_miktari), ol() - Ajani öldürür ve hayatta=False yapar.
+- Özellikler: id, x, y, z, hayatta, onumdeki_ajan, arkamdaki_ajan, lider_mi, can, hiz, duygular (korku, merak, şüphe), beceriler (yuzme, tirmanma, tuzak_fark_etme, engelden_kacma)
+- Metotlar: beceri_ogren(beceri_adi, miktar) - Beceriyi artırır, suya_gir(zemin_zorlugu) - Suda yüzme, can azaltır, korku artırır, hayatta kalırsa merak artırır, arkaya_bilgi_ilet(beceri_adi, ogretme_miktari) - Bilgiyi zincir boyunca iletir, ol() - Ajani öldürür, hayatta=False yapar, zinciri koparır.
 
 #### SuruYoneticisi
 Sürü yönetim sınıfı.
 - Özellikler: harita, ajanlar, liderler, maks_lider, tick_sayaci
-- Metotlar: suru_yarat(baslangic_x, baslangic_y, boyut), zinciri_kopar(kopan_ajan), guncelle() - Ölü ajanları kaldırır ve hareketi günceller, lider_yapay_zeka(lider), render(surface, font, aktif_katman) - Sadece hayatta ajanları çizer.
+- Metotlar: suru_yarat(baslangic_x, baslangic_y, boyut), zinciri_kopar(kopan_ajan), guncelle() - Ölü ajanları kaldırır, öğrenme verir, AI kararlarını çalıştırır, lider_yapay_zeka(lider) - Duygulara göre yön seçer, engelleri algılar, tuzaklardan kaçar, render(surface, font, aktif_katman) - Duygulara göre emoji gösterir.
 
 ### main.py
 

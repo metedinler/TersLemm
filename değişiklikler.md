@@ -12,3 +12,8 @@ Bu dosya programdaki tüm değişiklikleri kaydeder.
 - .copilot/plan.md oluşturuldu.
 - instructions.md'ye plan takip kuralı eklendi.
 - programcınınelkıtabı.md yeni sınıflar ve metotlarla güncellendi.
+
+## [Tarih: 21 Mart 2026 - AI Geliştirmesi]
+
+- AI kararları geliştirildi: Duygu matrisi ve öğrenme algoritmaları implement edildi. Lider AI engelleri algılıyor, duygulara göre karar veriyor, hayatta kalan ajanlar beceri kazanıyor.
+- programcınınelkıtabı.md yeni metotlarla güncellendi.

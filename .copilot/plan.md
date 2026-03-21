@@ -11,7 +11,7 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 6. Oyuncu araçlarını ekle: Mancınık, taş, çukur, kıyma makinesi, ayna, bariyer sınıfları, eskime formülleri.
 7. Oyun döngüsünü tamamla: Güncelleme, render, kazanma/kaybetme koşulları. (Tamamlandı: OyunYoneticisi eklendi, harita çıkışları güncellendi.)
 8. Araç etkileşimlerini implement et: Mancınık fırlatma, taş sendeletme, çukur düşürme kodlarını ekle. (Tamamlandı: etki_uygula() metotları eklendi, oyun döngüsüne entegre edildi.)
-9. AI kararlarını geliştir: Duygu matrisi ve öğrenme algoritmalarını implement et.
+9. AI kararlarını geliştir: Duygu matrisi ve öğrenme algoritmalarını implement et. (Tamamlandı: Lider AI duygulara göre karar veriyor, öğrenme sistemi eklendi.)
 10. Test et ve geliştir: Hareketi test et, AI kararlarını geliştir, seviye tasarımı ekle.
 
 **Relevant files**
