@@ -168,7 +168,8 @@ class OyuncuAleti:
         return False
 
     def render(self, surface, font):
-        sembol = str(self.arac_turu)
+        harfler = {0: 'M', 1: 'A', 2: 'B', 3: 'F', 4: 'C', 5: 'S', 6: 'T', 7: 'G', 8: 'K', 9: 'Y'}
+        sembol = harfler.get(self.arac_turu, str(self.arac_turu))
         px_x = self.x * PARSEK_BOYUTU
         px_y = self.y * PARSEK_BOYUTU
         text_surf = font.render(sembol, True, BEYAZ)
@@ -417,44 +418,6 @@ class HaritaYoneticisi:
                     if parsel.uzerindeki_alet and isinstance(parsel.uzerindeki_alet, CikisOku):
                         parsel.doku_id = 'CIKIS_KAPI'
                         parsel.uzerindeki_alet = None  # Araç kaldır, parsel çıkış olsun
-        """Örn: bolum_1_kat_0.txt dosyalarını okur, OOP nesnelerini oluşturur."""
-        
-        # Harita dosyasındaki karakterleri nesne sınıfına eşleyen tablo
-        eslesme_tablosu = {
-            '.': ZeminDuz,
-            '#': DuvarKaya,
-            '^': Dag,
-            '~': SuGol,
-            'X': lambda x, y, z: Parsel(x, y, z, 'CIKIS_DOGRU'),  # Basit sınıf
-            'O': lambda x, y, z: Parsel(x, y, z, 'CIKIS_SAHTE'),
-        }
-
-        # Şimdilik sadece Kat 0 ve Kat 1'i yükleyelim (Örnek olsun diye)
-        for kat in range(2): 
-            dosya_adi = f"{klasor_yolu}/bolum_1_kat_{kat}.txt"
-            try:
-                with open(dosya_adi, 'r') as f:
-                    satirlar = f.readlines()
-                    
-                    for y, satir in enumerate(satirlar):
-                        satir = satir.strip() # Satır sonu karakterlerini temizle
-                        if y >= HARITA_YUKSEKLIK_PARSEL: break
-
-                        for x, char in enumerate(satir):
-                            if x >= HARITA_GENISLIK_PARSEL: break
-                            
-                            # Karakteri sınıf ile eşleştir
-                            parsel_sinifi = eslesme_tablosu.get(char, ZeminDuz)
-                            
-                            # OOP Nesnesini oluştur ve 3D diziye koy
-                            self.map_grid[kat][y][x] = parsel_sinifi(x, y, kat)
-            
-            except FileNotFoundError:
-                print(f"Hata: {dosya_adi} bulunamadı. Boş katman oluşturuldu.")
-                # Eğer dosya yoksa varsayılan olarak her yeri düz zemin yap
-                for y in range(HARITA_YUKSEKLIK_PARSEL):
-                    for x in range(HARITA_GENISLIK_PARSEL):
-                        self.map_grid[kat][y][x] = ZeminDuz(x, y, kat)
 
     def aktif_katmani_degistir(self, yeni_kat):
         """Mini-mapten tıklayınca veya ajan düşünce kat değiştirir."""

@@ -46,7 +46,7 @@ Sürü yönetimi. Zincirleme hareket, lider AI, kopma mantığı.
 8: Kıyma Makinesi - Öldürür.
 9: Yönlendirici - Yön değiştirir.
 
-Araçlar harita üzerinde sayı olarak gösterilir (0-9).
+Araçlar harita üzerinde harf olarak gösterilir (M, A, B, F, C, S, T, G, K, Y).
 
 ## Renk Sistemi
 RENKLER sözlüğü ile harita türlerine renk atanır. Su türleri derinliğe göre gradyan.

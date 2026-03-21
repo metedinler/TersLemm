@@ -13,8 +13,8 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 8. Araç etkileşimlerini implement et: Mancınık fırlatma, taş sendeletme, çukur düşürme kodlarını ekle. (Tamamlandı)
 9. AI kararlarını geliştir: Duygu matrisi ve öğrenme algoritmalarını implement et. (Tamamlandı)
 10. Test et ve geliştir: Hareketi test et, AI kararlarını geliştir, seviye tasarımı ekle. (Tamamlandı)
-11. Harita tasarımını güncelle: Araçları harflerle göster, grafik değil. (Yeni)
-12. Oyun başlangıç sırasını doğrula: Harita renklerle üretilir, oyuncu tuzaklar koyar, oyun başlar, sürü girer, sistemler çalışır. (Yeni)
+11. Harita tasarımını güncelle: Araçları harflerle göster, grafik değil. (Tamamlandı)
+12. Oyun başlangıç sırasını doğrula: Harita renklerle üretilir, oyuncu tuzaklar koyar, oyun başlar, sürü girer, sistemler çalışır. (Tamamlandı)
 
 **İlgili Dosyalar**
 - `main.py` — Ana oyun döngüsü ve motor.
@@ -28,8 +28,8 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 3. Fare ile araç yerleştir ve etkilerini test et. (Tamamlandı)
 4. AI kararlarını test et, öğrenmeyi doğrula. (Tamamlandı)
 5. Kazanma/kaybetme koşullarını test et. (Tamamlandı)
-6. Araçları harflerle göster. (Yeni)
-7. Oyun başlangıç sırasını test et. (Yeni)
+6. Araçları harflerle göster. (Tamamlandı)
+7. Oyun başlangıç sırasını test et. (Tamamlandı)
 
 **Kararlar**
 - Tema: Evrimsel Laboratuvar / Sentetik Test Odası.
@@ -43,5 +43,5 @@ Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü 
 1. AI derinliğini artır: Daha karmaşık karar ağacı, kolektif zeka. (Tamamlandı)
 2. Seviye editörü ekle: Harita oluşturma aracı. (Tamamlandı)
 3. Ses efektleri ve müzik: Atmosfer güçlendirme. (Tamamlandı)
-4. Araç gösterimini harflere çevir. (Yeni)
-5. Oyun akışını doğrula. (Yeni)
+4. Araç gösterimini harflere çevir. (Tamamlandı)
+5. Oyun akışını doğrula. (Tamamlandı)

@@ -4,12 +4,9 @@ Bu dosya programdaki tüm değişiklikleri kaydeder.
 
 ## [Tarih: Güncel]
 
-- Araç gösterimi harflere çevrildi: OyuncuAleti render() metodu str(self.arac_turu) kullanacak şekilde güncellendi, araçlar 0-9 sayı olarak gösterilir.
-- Tüm araç sınıflarına arac_turu parametresi eklendi: Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici init'lerine arac_turu eklendi.
-- main.py yerlestir_arac fonksiyonu arac_turu parametresi ile güncellendi.
-- .copilot/programcı el kitabı.md oluşturuldu: Kod yapısı, sınıflar, oyun akışı, araçlar, renk sistemi, AI sistemi, geliştirme notları.
-- README.md güncellendi: Yeni araçlar (0-9), oyun akışı, düzenleme modu kontrolleri, özellikler eklendi.
-- .copilot/plan.md güncellendi: Araç harf gösterimi ve oyun akışı doğrulama adımları eklendi.
+- Araç gösterimi harflere çevrildi: OyuncuAleti render() metodu harf dictionary'si ile güncellendi, araçlar M, A, B, F, C, S, T, G, K, Y harfleri olarak gösterilir.
+- cikis_oklarini_kapiya_cevir metodundaki yanlış kod kaldırıldı, NameError giderildi.
+- Dokümantasyon güncellendi: plan.md, programcı el kitabı.md, README.md, değişiklikler.md araç harf gösterimi ile güncellendi.
 
 ## [Tarih: 21 Mart 2026]
 

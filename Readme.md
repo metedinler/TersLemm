@@ -3,18 +3,18 @@ Bu oyun, bir sahaya insanın yapay zekaya karşı tuzaklar hazırlayarak düşma
 
 ## Tuzaklar ve İşlevleri
 
-Oyunda kullanılan tuzaklar ve ne işe yaradıkları (harita üzerinde sayı olarak gösterilir):
+Oyunda kullanılan tuzaklar ve ne işe yaradıkları (harita üzerinde harf olarak gösterilir):
 
-- **0: Mancınık**: Yakındaki ajanları fırlatır. Ajanların yönünü değiştirir ve hızını artırır. Korku duygusunu yükseltir.
-- **1: Ayna**: Ajanların yönünü ters çevirir. Korku duygusunu yükseltir.
-- **2: Bariyer**: Engel koyar, ajanları yavaşlatır. Şüphe duygusunu yükseltir.
-- **3: Ateş**: Ajanları yakar, hasar verir ve hızlandırır. Korku duygusunu yükseltir.
-- **4: Çıkış Oku**: Çıkış işaretler. Oyun başlayınca kapıya dönüşür.
-- **5: Sahte Yol**: Lemler yolları tercih eder.
-- **6: Sendeletme Taşı**: Ajanları sendeletir. Yönünü değiştirir ve hızını azaltır. Şüphe duygusunu yükseltir.
-- **7: Gizli Çukur**: Ajanları öldürür. Üzerine basan ajanı anında öldürür.
-- **8: Kıyma Makinesi**: Ajanları öldürür. Üzerine basan ajanı anında öldürür.
-- **9: Yönlendirici**: Ajanların yönünü değiştirir. Belirli bir yöne yönlendirir, örneğin sağa.
+- **M: Mancınık**: Yakındaki ajanları fırlatır. Ajanların yönünü değiştirir ve hızını artırır. Korku duygusunu yükseltir.
+- **A: Ayna**: Ajanların yönünü ters çevirir. Korku duygusunu yükseltir.
+- **B: Bariyer**: Engel koyar, ajanları yavaşlatır. Şüphe duygusunu yükseltir.
+- **F: Ateş**: Ajanları yakar, hasar verir ve hızlandırır. Korku duygusunu yükseltir.
+- **C: Çıkış Oku**: Çıkış işaretler. Oyun başlayınca kapıya dönüşür.
+- **S: Sahte Yol**: Lemler yolları tercih eder.
+- **T: Sendeletme Taşı**: Ajanları sendeletir. Yönünü değiştirir ve hızını azaltır. Şüphe duygusunu yükseltir.
+- **G: Gizli Çukur**: Ajanları öldürür. Üzerine basan ajanı anında öldürür.
+- **K: Kıyma Makinesi**: Ajanları öldürür. Üzerine basan ajanı anında öldürür.
+- **Y: Yönlendirici**: Ajanların yönünü değiştirir. Belirli bir yöne yönlendirir, örneğin sağa.
 
 ## Kurulum ve Çalıştırma
 
@@ -43,7 +43,7 @@ python main.py
 **Düzenleme Modu Kontrolleri:**
 - Fare sol tıklama: Araç yerleştir
 - Fare sağ tıklama: Araç kaldır
-- 1-0: Araç seç (1: Mancınık, ..., 0: Yönlendirici)
+- 1-0: Araç seç (1: M, ..., 0: Y)
 - Yukarı/Aşağı ok: Katman değiştir
 - S: Kaydet
 - ESC: Oyunu başlat
