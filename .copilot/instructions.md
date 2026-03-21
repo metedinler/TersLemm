@@ -8,7 +8,7 @@
 
 3. programda modüller silinmeyecektir. sılınması gereken moduller kullanılmayanlar dızınıne kaldırılır, kullanılmayanlar dızını calısma klasorunde gurultu yapmaması ıcın calısma dızını dısında olmalıdır.
 
-4. programın her adımında yerel git ve internet gitine yükleme yapılacaktır
+4. programın her adımında yerel git ve internet gitine yükleme yapılacaktır. her adım her promt anlamında degıldır.
 
 5. programın çalışma ilkeleri ve tasarım artefactı ve programın her modulünün, her sınıfının, her metodun ve her bağımsız fonksiyonun görevi üretildiğinde veya üzerinde değişiklik yapıldığında programcınınelkıtabı.md ye yazılacaktır. degıskenlerın, verı yapılarının amacı ve gorevlerı ve sınırları, degıdken tıpı, sınıf ve metodun gırıslerı ve cıkısları yazılacaktır.
 
