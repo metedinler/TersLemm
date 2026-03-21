@@ -15,20 +15,48 @@ AJAN_SAYISI = 50  # Lem sayısı
 AJAN_HIZI = 0.5   # Çok yavaş hareket için
 
 # --- ARAÇ SAYILARI ---
-MANCINIK_SAYISI = 20  # Artırıldı
-AYNA_SAYISI = 20      # Artırıldı
-BARIYER_SAYISI = 30   # Artırıldı
-ATES_SAYISI = 20      # Artırıldı
-SAHTE_YOL_SAYISI = 15 # Yeni araç
+MANCINIK_SAYISI = 50  # Artırıldı
+AYNA_SAYISI = 40      # Artırıldı
+BARIYER_SAYISI = 60   # Artırıldı
+ATES_SAYISI = 40      # Artırıldı
+SAHTE_YOL_SAYISI = 30 # Yeni araç
 CIKIS_OKU_SAYISI = 1
+SENDELETME_TASI_SAYISI = 30
+GIZLI_CUKUR_SAYISI = 20
+KIYMA_MAKINESI_SAYISI = 10
+YONLENDIRICI_SAYISI = 50
 
-# --- RENK TANIMLARI ---
-SIYAH = (0, 0, 0)
-BEYAZ = (255, 255, 255)
-GRI = (128, 128, 128)
-KIRMIZI = (255, 0, 0)
+# --- PARSEL RENKLERİ ---
+RENKLER = {
+    'ZEMIN_DUZ': (128, 128, 128),  # Gri
+    'DUVAR_KAYA': (64, 64, 64),    # Koyu gri
+    'SU_GOL': (100, 149, 237),     # Açık mavi (derinliğe göre değişir)
+    'DENIZ': (0, 0, 139),          # Koyu mavi (derinliğe göre)
+    'DAG': (139, 69, 19),          # Kahve
+    'DIK_DAG': (105, 105, 105),    # Gri
+    'ORMAN': (34, 139, 34),        # Yeşil
+    'SIKI_ORMAN': (0, 100, 0),     # Koyu yeşil
+    'YOL': (139, 69, 19),          # Kahve
+    'TAS_DUVAR': (64, 64, 64),     # Koyu gri
+    'OVA': (144, 238, 144),        # Açık yeşil
+    'PLATO': (169, 169, 169),      # Gri
+    'CALILIK': (173, 255, 47),     # Açık yeşil
+    'TASLIK': (128, 128, 128),     # Gri
+    'COL': (255, 215, 0),          # Sarı (kum)
+    'KAZILABILIR': (160, 82, 45),  # Kahve
+    'CIKIS_DOGRU': (0, 255, 0),    # Yeşil
+    'CIKIS_SAHTE': (255, 0, 0),    # Kırmızı
+    'CIKIS_KAPI': (0, 128, 0),     # Koyu yeşil
+    'CIKIS_OKU': (255, 255, 255),  # Beyaz
+    'SAHTE_YOL': (139, 69, 19),    # Kahve
+}
+
+# Ek renk sabitleri
 YESIL = (0, 255, 0)
-MAVI = (0, 0, 255)
+KIRMIZI = (255, 0, 0)
+GRI = (128, 128, 128)
+BEYAZ = (255, 255, 255)
+
 # Windows ortamında standart Truetype fontlar emojileri destekler.
 # Eğer özel pixel font kullanırsan bu karakterleri o fontta tasarlaman gerekir.
 DOKULAR = {

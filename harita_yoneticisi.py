@@ -23,12 +23,44 @@ class Parsel:
         self.uzerindeki_alet = None
         self.suru_ajanlari = [] # linked list pointerları buraya gelecek
 
+class Parsel:
+    """Temel 'Parsel' sınıfı. Excel kutusu. Miras alınır."""
+    def __init__(self, x, y, z, doku_id):
+        self.x = x  # Grid koordinat X
+        self.y = y  # Grid koordinat Y
+        self.z = z  # Grid koordinat Z (Katman)
+        self.doku_id = doku_id
+        
+        # Temel Özellikler
+        self.yurunebilir = True
+        self.yavaslatma_katsayisi = 1.0  # Normal hız
+        self.kazilabilir = False
+        self.bogulma_riski = False
+        self.hasar_verir = False
+        self.derinlik = 0  # Su türleri için derinlik
+        
+        # Üzerindeki dinamik nesneler (Oyuncu tuzağı, sürüyü ajanları vb.)
+        self.uzerindeki_alet = None
+        self.suru_ajanlari = [] # linked list pointerları buraya gelecek
+
     def render(self, surface, font):
         """Hücreyi ekrana çizer."""
         px_x = self.x * PARSEK_BOYUTU
         px_y = self.y * PARSEK_BOYUTU
         rect = pygame.Rect(px_x, px_y, PARSEK_BOYUTU, PARSEK_BOYUTU)
-        pygame.draw.rect(surface, GRI, rect, 1)
+        
+        # Renk belirle
+        renk = RENKLER.get(self.doku_id, GRI)
+        if self.doku_id in ['SU_GOL', 'DENIZ']:
+            # Derinliğe göre mavi tonu
+            if self.derinlik <= 5:
+                renk = (100, 149, 237)  # Açık mavi
+            elif self.derinlik <= 10:
+                renk = (0, 0, 139)      # Koyu mavi
+            else:
+                renk = (0, 0, 50)       # Çok koyu mavi
+        
+        pygame.draw.rect(surface, renk, rect, 1)
 
         # Sembolü çiz
         sembol = DOKULAR.get(self.doku_id, ' ? ')
@@ -73,7 +105,7 @@ class Deniz(Parsel):
 class SikiOrman(Parsel):
     def __init__(self, x, y, z):
         super().__init__(x, y, z, 'SIKI_ORMAN')
-        self.yavaslatma_katsayisi = 1.5 # Sık orman, yavaş
+        self.yavaslatma_katsayisi = 2.0 # Çok yavaş
 
 class Yol(Parsel):
     def __init__(self, x, y, z):
@@ -118,11 +150,12 @@ class Col(Parsel):
 # --- OYUNCU ALETLERİ ---
 
 class OyuncuAleti:
-    def __init__(self, x, y, z, doku_id):
+    def __init__(self, x, y, z, doku_id, arac_turu):
         self.x = x
         self.y = y
         self.z = z
         self.doku_id = doku_id
+        self.arac_turu = arac_turu
         self.maks_kapasite = 50
         self.mevcut_kapasite = 50
         self.gizlilik_carpani = 0.5
@@ -135,7 +168,7 @@ class OyuncuAleti:
         return False
 
     def render(self, surface, font):
-        sembol = OYUNCU_ALETLERI.get(self.doku_id, ' ? ')
+        sembol = str(self.arac_turu)
         px_x = self.x * PARSEK_BOYUTU
         px_y = self.y * PARSEK_BOYUTU
         text_surf = font.render(sembol, True, BEYAZ)
@@ -144,8 +177,8 @@ class OyuncuAleti:
         surface.blit(text_surf, text_rect)
 
 class Mancinik(OyuncuAleti):
-    def __init__(self, x, y, z, zemin_tipi):
-        super().__init__(x, y, z, 'MANCINIK')
+    def __init__(self, x, y, z, zemin_tipi, arac_turu):
+        super().__init__(x, y, z, 'MANCINIK', arac_turu)
         if zemin_tipi == 'sert':
             self.maks_kapasite = 50
         else:
@@ -158,15 +191,15 @@ class Mancinik(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1 and abs(ajan.z - self.z) <= 1:
                 # Rastgele yön değiştir
                 import random
                 ajan.yon = random.choice(['yukari', 'asagi', 'sol', 'sag'])
                 ajan.hiz *= 2  # Hızlandır
 
 class SendeletmeTasi(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'TAS')
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'TAS', arac_turu)
         self.maks_kapasite = 5
         self.mevcut_kapasite = 5
 
@@ -175,14 +208,14 @@ class SendeletmeTasi(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1 and abs(ajan.z - self.z) <= 1:
                 import random
                 ajan.yon = random.choice(['yukari', 'asagi', 'sol', 'sag'])
                 ajan.hiz *= 0.5  # Yavaşlat
 
 class GizliCukur(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'CIKIS_SAHTE')  # Sahte çıkış gibi
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'CIKIS_SAHTE', arac_turu)  # Sahte çıkış gibi
         self.maks_kapasite = 1  # Tek seferlik
 
     def etki_uygula(self, ajanlar):
@@ -194,8 +227,8 @@ class GizliCukur(OyuncuAleti):
                 ajan.hayatta = False  # Öldür
 
 class KiymaMakinesi(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'CIKIS_DOGRU')  # Tehlikeli çıkış
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'CIKIS_DOGRU', arac_turu)  # Tehlikeli çıkış
         self.maks_kapasite = 100  # Sürekli
 
     def etki_uygula(self, ajanlar):
@@ -207,8 +240,8 @@ class KiymaMakinesi(OyuncuAleti):
                 ajan.hayatta = False  # Öldür
 
 class Yonlendirici(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'ORMAN')  # Orman gibi
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'ORMAN', arac_turu)  # Orman gibi
         self.maks_kapasite = 20
 
     def etki_uygula(self, ajanlar):
@@ -216,13 +249,13 @@ class Yonlendirici(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1 and abs(ajan.z - self.z) <= 1:
                 # Belirli bir yöne yönlendir, örneğin sağa
                 ajan.yon = 'sag'
 
 class Ayna(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'AYNA')  # Ayna emoji
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'AYNA', arac_turu)  # Ayna emoji
         self.maks_kapasite = 15
 
     def etki_uygula(self, ajanlar):
@@ -230,7 +263,7 @@ class Ayna(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1 and abs(ajan.z - self.z) <= 1:
                 # Yönü ters çevir (180 derece)
                 if ajan.yon == 'sag':
                     ajan.yon = 'sol'
@@ -243,8 +276,8 @@ class Ayna(OyuncuAleti):
                 ajan.duygular['korku'] += 0.1  # Korku artır
 
 class Bariyer(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'BARIYER')  # Bariyer emoji
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'BARIYER', arac_turu)  # Bariyer emoji
         self.maks_kapasite = 30
 
     def etki_uygula(self, ajanlar):
@@ -258,13 +291,13 @@ class Bariyer(OyuncuAleti):
             parsel.doku_id = 'BARIYER'
         # Yakındaki ajanları yavaşlat
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1 and abs(ajan.z - self.z) <= 1:
                 ajan.hiz *= 0.8  # Yavaşlat
                 ajan.duygular['suphe'] += 0.1
 
 class Ates(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'ATES')  # Ateş emoji
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'ATES', arac_turu)  # Ateş emoji
         self.maks_kapasite = 10
 
     def etki_uygula(self, ajanlar):
@@ -272,22 +305,22 @@ class Ates(OyuncuAleti):
         if not self.kullan():
             return
         for ajan in ajanlar:
-            if abs(ajan.x - self.x) <= 2 and abs(ajan.y - self.y) <= 2 and abs(ajan.z - self.z) <= 2:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1 and abs(ajan.z - self.z) <= 1:
                 ajan.can -= 20  # Hasar ver
                 ajan.hiz *= 1.2  # Hızlandır
                 ajan.duygular['korku'] += 0.2
 
 class CikisOku(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'CIKIS_OKU')  # Çıkış oku emoji
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'CIKIS_OKU', arac_turu)  # Çıkış oku emoji
         self.maks_kapasite = 1  # Sadece bir çıkış
 
     def etki_uygula(self, ajanlar):
         """Çıkış oku, etki yok, sadece işaret."""
         pass  # Oyun başlayınca kapıya dönüşür  # Korku artır
 class SahteYol(OyuncuAleti):
-    def __init__(self, x, y, z):
-        super().__init__(x, y, z, 'SAHTE_YOL')  # Sahte yol emoji
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'SAHTE_YOL', arac_turu)  # Sahte yol emoji
         self.maks_kapasite = 50  # Sürekli
 
     def etki_uygula(self, ajanlar):
@@ -348,7 +381,14 @@ class HaritaYoneticisi:
                         'Calilik': Calilik, 'Taslik': Taslik, 'Col': Col
                     }
                     parsel_sinifi = sinif_eslesme.get(secilen_tur, ZeminDuz)
-                    self.map_grid[kat][y][x] = parsel_sinifi(x, y, kat)
+                    parsel = parsel_sinifi(x, y, kat)
+                    
+                    # Su türleri için derinlik ata
+                    if secilen_tur in ['SuGol', 'Deniz']:
+                        import random
+                        parsel.derinlik = random.randint(1, 15)  # 1-5 az, 6-10 orta, 11+ çok
+                    
+                    self.map_grid[kat][y][x] = parsel
             
             # Yol oluştur: Girişten çıkışa basit yol
             if kat == self.giris_katman:

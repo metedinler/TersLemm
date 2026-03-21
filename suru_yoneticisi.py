@@ -112,16 +112,41 @@ class SuruAjani:
             # Hayatta kalınca merak artar
             self.duygular["merak"] += 10
 
-    def arkaya_bilgi_ilet(self, beceri_adi, ogretme_miktari):
-        """Bilgi zincir boyunca geriye akar, gittikçe güçlenir (veya zayıflar)."""
-        if self.arkamdaki_ajan:
-            # Arkadaki ajan bu bilgiyi alır
-            self.arkamdaki_ajan.beceri_ogren(beceri_adi, ogretme_miktari)
-            
-            # Senin kuralın: En arkadakiler daha iyi öğrenir! 
-            # Bilgi arkaya gittikçe çarpanı artırabiliriz.
-            yeni_miktar = ogretme_miktari * 1.1 
-            self.arkamdaki_ajan.arkaya_bilgi_ilet(beceri_adi, yeni_miktar)
+    def zemin_kontrol(self, harita_yon):
+        """Hareket sonrası zeminin zorluğunu kontrol et."""
+        if not (0 <= self.x < HARITA_GENISLIK_PARSEL and 0 <= self.y < HARITA_YUKSEKLIK_PARSEL and 0 <= self.z < harita_yon.max_katman):
+            return
+        parsel = harita_yon.map_grid[self.z][self.y][self.x]
+        if not parsel:
+            return
+        
+        zemin_zorlugu = 0
+        if parsel.doku_id == 'SIKI_ORMAN':
+            zemin_zorlugu = 2.0  # Çok zor
+        elif parsel.doku_id in ['SU_GOL', 'DENIZ']:
+            if parsel.derinlik > 10:
+                zemin_zorlugu = 5.0  # Çok derin, boğulma
+            elif parsel.derinlik > 5:
+                zemin_zorlugu = 3.0  # Orta derin
+            else:
+                zemin_zorlugu = 1.0  # Az derin
+            self.suya_gir(zemin_zorlugu)
+            return
+        elif parsel.doku_id in ['DAG', 'DIK_DAG']:
+            zemin_zorlugu = 1.5  # Yavaşlatır
+        elif parsel.doku_id == 'COL':
+            zemin_zorlugu = 1.5  # Çöl susuzluk
+        
+        if zemin_zorlugu > 0:
+            direnc = self.beceriler.get("direnc", 0)
+            harcanan_efor = zemin_zorlugu - (direnc * 0.5)
+            if harcanan_efor > 0:
+                self.can -= harcanan_efor
+                self.duygular["korku"] += harcanan_efor * 2
+                if self.can <= 0:
+                    self.ol()
+                elif self.lider_mi and harcanan_efor > 1:
+                    self.arkaya_bilgi_ilet("direnc", 1.0)
 
     # --- DURUM METOTLARI ---
 
@@ -209,16 +234,20 @@ class SuruYoneticisi:
             for ajan in self.ajanlar:
                 ajan.eski_x = ajan.x
                 ajan.eski_y = ajan.y
+                ajan.eski_z = ajan.z
 
             # 2. Aşama: Liderler karar verir ve hareket eder
             for lider in self.liderler:
                 self.lider_yapay_zeka(lider, self.harita)
+                lider.zemin_kontrol(self.harita)
 
             # 3. Aşama: Takipçiler sadece önündekinin "eski" konumuna geçer
             for ajan in self.ajanlar:
                 if not ajan.lider_mi and ajan.onumdeki_ajan:
                     ajan.x = ajan.onumdeki_ajan.eski_x
                     ajan.y = ajan.onumdeki_ajan.eski_y
+                    ajan.z = ajan.onumdeki_ajan.eski_z  # Katman da
+                    ajan.zemin_kontrol(self.harita)
 
     def lider_yapay_zeka(self, lider, harita_yon):
         """Gelişmiş AI: Duygular, engeller ve tuzaklar dikkate alınarak karar verir."""
