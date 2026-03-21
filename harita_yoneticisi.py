@@ -72,6 +72,16 @@ class OyuncuAleti:
         self.y = y
         self.z = z
         self.doku_id = doku_id
+        self.maks_kapasite = 50
+        self.mevcut_kapasite = 50
+        self.gizlilik_carpani = 0.5
+        self.zemin_katsayisi = 1.0
+
+    def kullan(self):
+        if self.mevcut_kapasite > 0:
+            self.mevcut_kapasite -= 0.3 * self.zemin_katsayisi
+            return True
+        return False
 
     def render(self, surface, font):
         sembol = OYUNCU_ALETLERI.get(self.doku_id, ' ? ')
@@ -81,6 +91,83 @@ class OyuncuAleti:
         rect = pygame.Rect(px_x, px_y, PARSEK_BOYUTU, PARSEK_BOYUTU)
         text_rect = text_surf.get_rect(center=rect.center)
         surface.blit(text_surf, text_rect)
+
+class Mancinik(OyuncuAleti):
+    def __init__(self, x, y, z, zemin_tipi):
+        super().__init__(x, y, z, 'MANCINIK')
+        if zemin_tipi == 'sert':
+            self.maks_kapasite = 50
+        else:
+            self.maks_kapasite = 20
+        self.mevcut_kapasite = self.maks_kapasite
+        self.zemin_katsayisi = 1.0 if zemin_tipi == 'sert' else 2.5
+
+    def etki_uygula(self, ajanlar):
+        """Yakındaki ajanları fırlatır (yön değiştirir ve hızlandırır)."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+                # Rastgele yön değiştir
+                import random
+                ajan.yon = random.choice(['yukari', 'asagi', 'sol', 'sag'])
+                ajan.hiz *= 2  # Hızlandır
+
+class SendeletmeTasi(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'TAS')
+        self.maks_kapasite = 5
+        self.mevcut_kapasite = 5
+
+    def etki_uygula(self, ajanlar):
+        """Ajanları sendeletir, yön değiştirir."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+                import random
+                ajan.yon = random.choice(['yukari', 'asagi', 'sol', 'sag'])
+                ajan.hiz *= 0.5  # Yavaşlat
+
+class GizliCukur(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'CIKIS_SAHTE')  # Sahte çıkış gibi
+        self.maks_kapasite = 1  # Tek seferlik
+
+    def etki_uygula(self, ajanlar):
+        """Ajanları düşürür, öldürür."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if ajan.x == self.x and ajan.y == self.y:
+                ajan.hayatta = False  # Öldür
+
+class KiymaMakinesi(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'CIKIS_DOGRU')  # Tehlikeli çıkış
+        self.maks_kapasite = 100  # Sürekli
+
+    def etki_uygula(self, ajanlar):
+        """Ajanları öldürür."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if ajan.x == self.x and ajan.y == self.y:
+                ajan.hayatta = False  # Öldür
+
+class Yonlendirici(OyuncuAleti):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'ORMAN')  # Orman gibi
+        self.maks_kapasite = 20
+
+    def etki_uygula(self, ajanlar):
+        """Ajanların yönünü değiştirir."""
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= 1 and abs(ajan.y - self.y) <= 1:
+                # Belirli bir yöne yönlendir, örneğin sağa
+                ajan.yon = 'sag'
 
 # --- 🗄️ HARİTA VERİ YÖNETİCİSİ (Çok Boyutlu Dizi) ---
 
@@ -103,6 +190,8 @@ class HaritaYoneticisi:
             '#': DuvarKaya,
             '^': Dag,
             '~': SuGol,
+            'X': lambda x, y, z: Parsel(x, y, z, 'CIKIS_DOGRU'),  # Basit sınıf
+            'O': lambda x, y, z: Parsel(x, y, z, 'CIKIS_SAHTE'),
         }
 
         # Şimdilik sadece Kat 0 ve Kat 1'i yükleyelim (Örnek olsun diye)
@@ -145,3 +234,11 @@ class HaritaYoneticisi:
         for satir in katman:
             for parsel in satir:
                 parsel.render(surface, font)
+
+    def arac_etkilerini_uygula(self, ajanlar):
+        """Tüm araçların etkilerini ajanlara uygular."""
+        katman = self.map_grid[self.aktif_katman]
+        for satir in katman:
+            for parsel in satir:
+                if parsel.uzerindeki_alet and hasattr(parsel.uzerindeki_alet, 'etki_uygula'):
+                    parsel.uzerindeki_alet.etki_uygula(ajanlar)

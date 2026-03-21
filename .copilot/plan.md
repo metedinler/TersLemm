@@ -1,0 +1,39 @@
+## Plan: Ters Lemmings Oyun Geliştirme
+
+Yeni nesil sistemik puzzle oyunu geliştirmek. Oyuncu tuzaklar kurar, AI sürü karar verir ve zincirleme takip eder. Çok katmanlı harita, duygu matrisi, öğrenme sistemi ile özgün bir deneyim.
+
+**Steps**
+1. Kod yapısını analiz et: Gemini konuşmasındaki Python sınıflarını incele, OOP mimarisini anla.
+2. Proje yapısını oluştur: ters_lemmings klasörü, main.py, ayarlar.py, harita_yoneticisi.py, suru_yoneticisi.py dosyalarını oluştur.
+3. Harita sistemini implement et: Çok boyutlu dizi, pasif nesneler, .txt'den yükleme.
+4. Sürü ajanlarını implement et: SuruAjani sınıfı, duygular, beceriler, öğrenme.
+5. Sürü yöneticisini implement et: Zincirleme hareket, lider AI, kopma mantığı.
+6. Oyuncu araçlarını ekle: Mancınık, taş, çukur, kıyma makinesi, ayna, bariyer sınıfları, eskime formülleri.
+7. Oyun döngüsünü tamamla: Güncelleme, render, kazanma/kaybetme koşulları.
+8. Test et ve geliştir: Hareketi test et, AI kararlarını geliştir, seviye tasarımı ekle.
+
+**Relevant files**
+- `main.py` — Ana oyun döngüsü ve motor.
+- `ayarlar.py` — Sabitler, renkler, emojiler.
+- `harita_yoneticisi.py` — Harita OOP sınıfları, yükleme.
+- `suru_yoneticisi.py` — Sürü sınıfları, hareket matematiği.
+
+**Verification**
+1. Haritayı .txt'den yükle ve ekranda göster.
+2. Sürüyü yarat ve zincirleme hareket ettir.
+3. Fare ile araç yerleştir ve etkilerini test et.
+4. AI kararlarını test et, öğrenmeyi doğrula.
+5. Kazanma/kaybetme koşullarını test et.
+
+**Decisions**
+- Tema: Evrimsel Laboratuvar / Sentetik Test Odası.
+- Kazanma: %90 ölüm veya sahte kapıya yönlendirme.
+- Kaybetme: %10'dan fazla doğru kapıya ulaşma.
+- Sürü evrimi: %30 hayatta kalma ile deneyim kazanma.
+- Kod dili: Python + Pygame.
+- Görsel: Text-mode, emoji tabanlı.
+
+**Further Considerations**
+1. AI derinliğini artır: Daha karmaşık karar ağacı, kolektif zeka.
+2. Seviye editörü ekle: Harita oluşturma aracı.
+3. Ses efektleri ve müzik: Atmosfer güçlendirme.

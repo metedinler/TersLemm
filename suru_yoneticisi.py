@@ -9,6 +9,7 @@ class SuruAjani:
         self.x = x
         self.y = y
         self.z = 0  # Katman
+        self.hayatta = True
         
         # 2. ZİNCİR BAĞLANTILARI (Linked List Mantığı)
         self.onumdeki_ajan = None  # Liderse bu None'dır
@@ -80,6 +81,7 @@ class SuruAjani:
 
     def ol(self):
         print(f"Ajan {self.id} öldü!")
+        self.hayatta = False
         # Zinciri koparma işlemi: Arkamdaki ajan lidersiz kaldı!
         if self.arkamdaki_ajan:
             self.arkamdaki_ajan.onumdeki_ajan = None
@@ -140,6 +142,10 @@ class SuruYoneticisi:
         """Bu fonksiyon main.py içindeki oyun döngüsünde sürekli çağrılacak."""
         self.tick_sayaci += 1
         
+        # Ölü ajanları kaldır
+        self.ajanlar = [ajan for ajan in self.ajanlar if ajan.hayatta]
+        self.liderler = [lider for lider in self.liderler if lider.hayatta]
+        
         # Yapay zeka her karede (frame) düşünmez. Saniyede örneğin 5 kez karar verir.
         # Bu da hem oyunu satranç gibi oynanabilir kılar hem işlemciyi rahatlatır.
         if self.tick_sayaci >= (FPS // 5): 
@@ -177,8 +183,8 @@ class SuruYoneticisi:
     def render(self, surface, font, aktif_katman):
         """Ajanları ekrana karakter olarak çizer."""
         for ajan in self.ajanlar:
-            if ajan.z != aktif_katman:
-                continue # Ajan başka kattaysa çizme
+            if not ajan.hayatta or ajan.z != aktif_katman:
+                continue # Ölü ajan veya başka kattaysa çizme
 
             # Ajanın durumuna göre emojiyi belirle
             if ajan.lider_mi:
