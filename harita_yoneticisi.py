@@ -233,12 +233,13 @@ class HaritaYoneticisi:
         
         for satir in katman:
             for parsel in satir:
-                parsel.render(surface, font)
+                if parsel:
+                    parsel.render(surface, font)
 
     def arac_etkilerini_uygula(self, ajanlar):
         """Tüm araçların etkilerini ajanlara uygular."""
         katman = self.map_grid[self.aktif_katman]
         for satir in katman:
             for parsel in satir:
-                if parsel.uzerindeki_alet and hasattr(parsel.uzerindeki_alet, 'etki_uygula'):
+                if parsel and parsel.uzerindeki_alet and hasattr(parsel.uzerindeki_alet, 'etki_uygula'):
                     parsel.uzerindeki_alet.etki_uygula(ajanlar)

@@ -65,6 +65,8 @@ class SuruAjani:
             # Hayatta kaldı ama canı yandı. Liderse arkadakilere uyarı/bilgi gönder!
             if self.lider_mi and harcanan_efor > 2:
                 self.arkaya_bilgi_ilet("yuzme", ogretme_miktari=2.0)
+            # Hayatta kalınca merak artar
+            self.duygular["merak"] += 10
 
     def arkaya_bilgi_ilet(self, beceri_adi, ogretme_miktari):
         """Bilgi zincir boyunca geriye akar, gittikçe güçlenir (veya zayıflar)."""
@@ -146,6 +148,14 @@ class SuruYoneticisi:
         self.ajanlar = [ajan for ajan in self.ajanlar if ajan.hayatta]
         self.liderler = [lider for lider in self.liderler if lider.hayatta]
         
+        # Öğrenme: Hayatta kalan ajanlar zamanla beceri kazanır
+        for ajan in self.ajanlar:
+            if ajan.hayatta:
+                # Küçük rastgele beceri artışı
+                import random
+                beceri_adi = random.choice(list(ajan.beceriler.keys()))
+                ajan.beceri_ogren(beceri_adi, 0.1)
+        
         # Yapay zeka her karede (frame) düşünmez. Saniyede örneğin 5 kez karar verir.
         # Bu da hem oyunu satranç gibi oynanabilir kılar hem işlemciyi rahatlatır.
         if self.tick_sayaci >= (FPS // 5): 
@@ -167,18 +177,67 @@ class SuruYoneticisi:
                     ajan.y = ajan.onumdeki_ajan.eski_y
 
     def lider_yapay_zeka(self, lider):
-        """Geçici ve çok basit bir rota bulucu (Sağa doğru yürütme testi)."""
-        # Burada ileride karmaşık karar ağacımız (uçurum var mı, tuzak var mı) olacak.
-        # Şimdilik haritanın sağına doğru yürüsünler diye basit bir komut veriyoruz.
-        hedef_x = lider.x + 1
-        hedef_y = lider.y
+        """Gelişmiş AI: Duygular, engeller ve tuzaklar dikkate alınarak karar verir."""
+        import random
+        
+        # 1. Duygulara göre temel karar
+        korku = lider.duygular["korku"]
+        merak = lider.duygular["merak"]
+        suphe = lider.duygular["suphe"]
+        
+        # Korku yüksekse geri dön
+        if korku > 70:
+            hedef_x = lider.x - 1
+            hedef_y = lider.y
+        # Merak yüksekse rastgele yön
+        elif merak > 50:
+            yonler = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+            dx, dy = random.choice(yonler)
+            hedef_x = lider.x + dx
+            hedef_y = lider.y + dy
+        # Şüphe yüksekse dur (hareket etme)
+        elif suphe > 60:
+            return  # Hareket etme
+        # Normal: Sağa git
+        else:
+            hedef_x = lider.x + 1
+            hedef_y = lider.y
 
-        # Harita sınırından çıkmasın ve duvarlara çarpmasın
-        if hedef_x < HARITA_GENISLIK_PARSEL:
-            hedef_parsel = self.harita.map_grid[lider.z][hedef_y][hedef_x]
-            if hedef_parsel.yurunebilir:
-                lider.x = hedef_x
-                lider.y = hedef_y
+        # 2. Harita sınırlarını kontrol et
+        if not (0 <= hedef_x < HARITA_GENISLIK_PARSEL and 0 <= hedef_y < HARITA_YUKSEKLIK_PARSEL):
+            return  # Sınır dışı, hareket etme
+
+        # 3. Hedef parselleri kontrol et
+        hedef_parsel = self.harita.map_grid[lider.z][hedef_y][hedef_x]
+        
+        # Duvar veya tehlikeli zemin varsa dönme
+        if not hedef_parsel.yurunebilir or hedef_parsel.hasar_verir:
+            # Alternatif yön dene: Aşağı
+            hedef_y_alt = lider.y + 1
+            if 0 <= hedef_y_alt < HARITA_YUKSEKLIK_PARSEL:
+                alt_parsel = self.harita.map_grid[lider.z][hedef_y_alt][lider.x]
+                if alt_parsel.yurunebilir and not alt_parsel.hasar_verir:
+                    lider.x = lider.x
+                    lider.y = hedef_y_alt
+                    return
+            # Yukarı dene
+            hedef_y_ust = lider.y - 1
+            if 0 <= hedef_y_ust < HARITA_YUKSEKLIK_PARSEL:
+                ust_parsel = self.harita.map_grid[lider.z][hedef_y_ust][lider.x]
+                if ust_parsel.yurunebilir and not ust_parsel.hasar_verir:
+                    lider.x = lider.x
+                    lider.y = hedef_y_ust
+                    return
+            return  # Hareket edemiyor
+
+        # 4. Tuzak kontrolü: Üzerinde araç varsa kaç
+        if hedef_parsel.uzerindeki_alet:
+            lider.duygular["korku"] += 20  # Korku artır
+            return  # Kaç, hareket etme
+
+        # 5. Hareket et
+        lider.x = hedef_x
+        lider.y = hedef_y
 
     def render(self, surface, font, aktif_katman):
         """Ajanları ekrana karakter olarak çizer."""
@@ -191,6 +250,8 @@ class SuruYoneticisi:
                 sembol = SURU_DUYUMLAR['LIDER']
             elif ajan.duygular["korku"] > 50:
                 sembol = SURU_DUYUMLAR['KORKU']
+            elif ajan.duygular["merak"] > 50:
+                sembol = SURU_DUYUMLAR['MERAK']
             else:
                 sembol = SURU_DUYUMLAR['SAKIN']
 
