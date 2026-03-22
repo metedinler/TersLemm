@@ -1,0 +1,198 @@
+{
+  "zaman": "2026-03-22T22:06:37.452093Z",
+  "tick": 6000,
+  "ajan_id": 0,
+  "lider": true,
+  "gazi": true,
+  "gazi_puani": 200.0,
+  "can": 100.0,
+  "konum": {
+    "x": 17,
+    "y": 21,
+    "z": 1
+  },
+  "duygular": {
+    "korku": 100,
+    "merak": 100.0,
+    "suphe": 100.0
+  },
+  "hormonlar": {
+    "dopamin": 100.0,
+    "adrenalin": 7.200000000000003,
+    "oksitosin": 30.750000000000295,
+    "endorfin": 8.0,
+    "serotonin": 100.0,
+    "husran": 63.00000000000206,
+    "kortizol": 0.0
+  },
+  "beceriler": {
+    "yuzme": 0.2975,
+    "tirmanma": 0.0875,
+    "tuzak_fark_etme": 0.0875,
+    "engelden_kacma": 0.2625
+  },
+  "kavramsal_durum": "KULLANILABILIR",
+  "semantik_hafiza": [
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_KULLANILABILIR",
+      "kaynak": "legacy_koordinat",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "INCELE",
+      "amac": "duruma_gore_degerlendir",
+      "ilgili_beceri": "tuzak_fark_etme"
+    }
+  ],
+  "semantik_schema": "v2_nesne_tabanli"
+}

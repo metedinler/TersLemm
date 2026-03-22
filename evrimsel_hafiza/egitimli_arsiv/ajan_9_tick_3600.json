@@ -1,0 +1,198 @@
+{
+  "zaman": "2026-03-22T21:48:17.975607Z",
+  "tick": 3600,
+  "ajan_id": 9,
+  "lider": true,
+  "gazi": true,
+  "gazi_puani": 87.89000000000003,
+  "can": 100.0,
+  "konum": {
+    "x": 25,
+    "y": 11,
+    "z": 0
+  },
+  "duygular": {
+    "korku": 100,
+    "merak": 100,
+    "suphe": 100.0
+  },
+  "hormonlar": {
+    "dopamin": 100.0,
+    "adrenalin": 99.75,
+    "oksitosin": 12.000000000000028,
+    "endorfin": 8.0,
+    "serotonin": 100.0,
+    "husran": 48.99999999999997,
+    "kortizol": 99.8
+  },
+  "beceriler": {
+    "yuzme": 0.035,
+    "tirmanma": 0.0,
+    "tuzak_fark_etme": 0.035,
+    "engelden_kacma": 0.035
+  },
+  "kavramsal_durum": "IYI",
+  "semantik_hafiza": [
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    },
+    {
+      "nesne": "LEGACY_IYI",
+      "kaynak": "legacy_koordinat",
+      "etiket": "IYI",
+      "onerilen_tepki": "ULAS",
+      "amac": "faydali_nesneyi_kullan",
+      "ilgili_beceri": "tuzak_fark_etme"
+    }
+  ],
+  "semantik_schema": "v2_nesne_tabanli"
+}

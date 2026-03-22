@@ -1,0 +1,198 @@
+{
+  "zaman": "2026-03-22T23:00:39.730156Z",
+  "tick": 1200,
+  "ajan_id": 10,
+  "lider": false,
+  "gazi": false,
+  "gazi_puani": 0.0,
+  "can": 100.0,
+  "konum": {
+    "x": 32,
+    "y": 21,
+    "z": 1
+  },
+  "duygular": {
+    "korku": 3.502707926954362e-06,
+    "merak": 26.641964717790245,
+    "suphe": 1.1937965467915985e-06
+  },
+  "hormonlar": {
+    "dopamin": 23.43,
+    "adrenalin": 0.0,
+    "oksitosin": 12.730000000000066,
+    "endorfin": 13.05,
+    "serotonin": 83.10999999999999,
+    "husran": 0.0,
+    "kortizol": 0.0
+  },
+  "beceriler": {
+    "yuzme": 0.0,
+    "tirmanma": 1.435,
+    "tuzak_fark_etme": 0.0,
+    "engelden_kacma": 0.0,
+    "direnc": 0.0
+  },
+  "kavramsal_durum": "KULLANILABILIR",
+  "semantik_hafiza": [
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "KULLANILABILIR",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    }
+  ]
+}

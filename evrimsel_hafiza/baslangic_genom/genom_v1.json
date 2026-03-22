@@ -1,0 +1,24 @@
+{
+  "surum": 1,
+  "aciklama": "Tabula rasa baslangic genomu",
+  "duygular": {
+    "korku": 0.0,
+    "merak": 0.0,
+    "suphe": 0.0
+  },
+  "beceriler": {
+    "yuzme": 0.0,
+    "tirmanma": 0.0,
+    "tuzak_fark_etme": 0.0,
+    "engelden_kacma": 0.0
+  },
+  "hormonlar": {
+    "dopamin": 12.0,
+    "adrenalin": 8.0,
+    "oksitosin": 10.0,
+    "endorfin": 8.0,
+    "serotonin": 10.0,
+    "husran": 0.0,
+    "kortizol": 6.0
+  }
+}

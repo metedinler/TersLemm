@@ -1,0 +1,157 @@
+{
+  "zaman": "2026-03-22T19:36:49.524215Z",
+  "tick": 600,
+  "ajan_id": 0,
+  "lider": true,
+  "gazi": false,
+  "gazi_puani": 0.0,
+  "can": 100.0,
+  "konum": {
+    "x": 26,
+    "y": 5,
+    "z": 4
+  },
+  "duygular": {
+    "korku": 8.797500000000001,
+    "merak": 100.0,
+    "suphe": 1.7400000000000002
+  },
+  "hormonlar": {
+    "dopamin": 80.5,
+    "adrenalin": 0.5,
+    "oksitosin": 11.500000000000021,
+    "endorfin": 8.0,
+    "serotonin": 97.0,
+    "husran": 0.0,
+    "kortizol": 0.0
+  },
+  "beceriler": {
+    "yuzme": 0.0,
+    "tirmanma": 0.0,
+    "tuzak_fark_etme": 0.0,
+    "engelden_kacma": 0.0
+  },
+  "kavramsal_durum": "KULLANILABILIR",
+  "semantik_hafiza": [
+    {
+      "etiket": "IYI",
+      "x": 9,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 10,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 11,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 12,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 13,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 14,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 15,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 16,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 17,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 18,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 19,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 20,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 21,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 22,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 23,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 24,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 25,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 26,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 26,
+      "y": 6,
+      "z": 3
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 26,
+      "y": 5,
+      "z": 3
+    }
+  ]
+}

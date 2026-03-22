@@ -1,0 +1,198 @@
+{
+  "zaman": "2026-03-22T23:00:06.453694Z",
+  "tick": 1200,
+  "ajan_id": 0,
+  "lider": true,
+  "gazi": true,
+  "gazi_puani": 57.9405426907165,
+  "can": 100.0,
+  "konum": {
+    "x": 15,
+    "y": 11,
+    "z": 3
+  },
+  "duygular": {
+    "korku": 38.93095998541133,
+    "merak": 35.19466114488138,
+    "suphe": 27.461902288654066
+  },
+  "hormonlar": {
+    "dopamin": 44.93025624999999,
+    "adrenalin": 55.60300000000008,
+    "oksitosin": 21.330650000000123,
+    "endorfin": 10.317997499999999,
+    "serotonin": 100.0,
+    "husran": 38.760292500000396,
+    "kortizol": 39.899999999999956
+  },
+  "beceriler": {
+    "yuzme": 0.8415,
+    "tirmanma": 0.804,
+    "tuzak_fark_etme": 0.05373593749999999,
+    "engelden_kacma": 0.9392499999999999,
+    "direnc": 0.9290499999999999
+  },
+  "kavramsal_durum": "KOTU",
+  "semantik_hafiza": [
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    },
+    {
+      "nesne": "DENIZ",
+      "kaynak": "zemin",
+      "etiket": "KOTU",
+      "onerilen_tepki": "UZAK_DUR",
+      "amac": "olumcul_sudan_kacin",
+      "ilgili_beceri": "yuzme"
+    }
+  ]
+}

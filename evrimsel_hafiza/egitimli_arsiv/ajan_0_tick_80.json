@@ -1,0 +1,86 @@
+{
+  "zaman": "2026-03-22T22:48:12.362159Z",
+  "tick": 80,
+  "ajan_id": 0,
+  "lider": true,
+  "gazi": false,
+  "gazi_puani": 0.0,
+  "can": 100.0,
+  "konum": {
+    "x": 6,
+    "y": 22,
+    "z": 0
+  },
+  "duygular": {
+    "korku": 3.3558070000000044,
+    "merak": 86.098834,
+    "suphe": 45.83984000000143
+  },
+  "hormonlar": {
+    "dopamin": 79.309,
+    "adrenalin": 7.392500000000002,
+    "oksitosin": 25.416000000000203,
+    "endorfin": 8.399000000000001,
+    "serotonin": 87.7625,
+    "husran": 42.43900000000132,
+    "kortizol": 4.781999999999998
+  },
+  "beceriler": {
+    "yuzme": 0.25287499999999996,
+    "tirmanma": 0.104125,
+    "tuzak_fark_etme": 0.074375,
+    "engelden_kacma": 1.24,
+    "direnc": 0.0
+  },
+  "kavramsal_durum": "IYI",
+  "semantik_hafiza": [
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "IYI",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "IYI",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "IYI",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "IYI",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "IYI",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    },
+    {
+      "nesne": "YOL",
+      "kaynak": "zemin",
+      "etiket": "IYI",
+      "onerilen_tepki": "TAKIP_ET",
+      "amac": "hedefe_ilerle",
+      "ilgili_beceri": "engelden_kacma"
+    }
+  ]
+}

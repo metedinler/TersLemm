@@ -1,0 +1,157 @@
+{
+  "zaman": "2026-03-22T19:36:49.537326Z",
+  "tick": 700,
+  "ajan_id": 0,
+  "lider": true,
+  "gazi": false,
+  "gazi_puani": 0.0,
+  "can": 100.0,
+  "konum": {
+    "x": 34,
+    "y": 5,
+    "z": 4
+  },
+  "duygular": {
+    "korku": 18.1325,
+    "merak": 100.0,
+    "suphe": 7.354
+  },
+  "hormonlar": {
+    "dopamin": 89.0,
+    "adrenalin": 5.699999999999998,
+    "oksitosin": 11.300000000000024,
+    "endorfin": 8.0,
+    "serotonin": 100.0,
+    "husran": 2.7999999999999985,
+    "kortizol": 6.5
+  },
+  "beceriler": {
+    "yuzme": 0.0,
+    "tirmanma": 0.0,
+    "tuzak_fark_etme": 0.0,
+    "engelden_kacma": 0.0
+  },
+  "kavramsal_durum": "KULLANILABILIR",
+  "semantik_hafiza": [
+    {
+      "etiket": "IYI",
+      "x": 17,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 18,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 19,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 20,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 21,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 22,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 23,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 24,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 25,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "IYI",
+      "x": 26,
+      "y": 7,
+      "z": 3
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 26,
+      "y": 6,
+      "z": 3
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 26,
+      "y": 5,
+      "z": 3
+    },
+    {
+      "etiket": "KOTU",
+      "x": 26,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 27,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 28,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 29,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 30,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 31,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 32,
+      "y": 5,
+      "z": 4
+    },
+    {
+      "etiket": "KULLANILABILIR",
+      "x": 33,
+      "y": 5,
+      "z": 4
+    }
+  ]
+}
