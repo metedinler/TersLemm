@@ -2,10 +2,19 @@
 import pygame
 import sys
 import struct
+import suru_yoneticisi as suru_mod
 from ayarlar import *  # AJAN_SAYISI, AJAN_HIZI, araç sayıları dahil
 from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku, ZeminDuz, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
 from sid_player import SidMusicManager
+from oyun_bilesenleri import (
+    SesAyarMenusu,
+    AjanIzlemePenceresi,
+    OyunKayitYonetici,
+    OyunYoneticisi,
+    secili_arac_etiketi_ciz,
+    oyun_ici_menu,
+)
 
 # Ses sistemi başlat
 pygame.mixer.init()
@@ -48,55 +57,94 @@ try:
 except:
     ses_ajan_ol = basit_ses_uret(220, 0.2)  # Düşük ton ölüm sesi
 
-class OyunYoneticisi:
-    def __init__(self, suru_yon):
-        self.suru_yon = suru_yon
-        self.baslangic_nufusu = len(suru_yon.ajanlar)
-        self.olenler = 0
-        self.dogru_cikis = 0
-        self.sahte_cikis = 0
-        self.kazanma_kosulu = False
-        self.kaybetme_kosulu = False
+SES_DURUM = {"efekt": SES_ACIK}
 
-    def guncelle(self):
-        # Ajanları kontrol et
-        for ajan in self.suru_yon.ajanlar[:]:  # Kopya al, silme sırasında sorun olmasın
-            if ajan.can <= 0:
-                self.olenler += 1
-                self.suru_yon.ajanlar.remove(ajan)
-                if SES_ACIK and ses_ajan_ol:
-                    ses_ajan_ol.play()
-                continue
-            # Çıkış kontrolü
-            parsel = self.suru_yon.harita.map_grid[ajan.z][ajan.y][ajan.x]
-            if parsel.doku_id == 'CIKIS_DOGRU':
-                self.dogru_cikis += 1
-                self.suru_yon.ajanlar.remove(ajan)
-            elif parsel.doku_id == 'CIKIS_SAHTE':
-                self.sahte_cikis += 1
-                self.suru_yon.ajanlar.remove(ajan)
+# Bu dosya artik sadece oyun akisina odaklanir; detayli bileşenler oyun_bilesenleri.py icine ayrildi.
 
-        # Kazanma/Kaybetme
-        kalan = self.baslangic_nufusu - self.olenler - self.dogru_cikis - self.sahte_cikis
-        if kalan == 0:
-            if self.dogru_cikis / self.baslangic_nufusu <= 0.1:
-                self.kazanma_kosulu = True
-            else:
-                self.kaybetme_kosulu = True
 
-    def render(self, surface, font):
-        # UI göster
-        yazi = f"Olen: {self.olenler} | Dogru: {self.dogru_cikis} | Sahte: {self.sahte_cikis}"
-        text_surf = font.render(yazi, True, KIRMIZI)
-        surface.blit(text_surf, (10, 10))
-        if self.kazanma_kosulu:
-            kazandi_surf = font.render("KAZANDIN!", True, YESIL)
-            surface.blit(kazandi_surf, (EKRAN_GENISLIK // 2 - 50, EKRAN_YUKSEKLIK // 2))
-        elif self.kaybetme_kosulu:
-            kaybetti_surf = font.render("KAYBETTIN!", True, KIRMIZI)
-            surface.blit(kaybetti_surf, (EKRAN_GENISLIK // 2 - 50, EKRAN_YUKSEKLIK // 2))
+def baslangic_menusu():
+    """Gerçek başlangıç menüsü: başlat/çıkış ve zorluk seçimi."""
+    pygame.init()
+    pygame.font.init()
 
-def duzenleme_modu():
+    ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
+    pygame.display.set_caption("Ters Lemmings - Baslangic Menusu")
+    clock = pygame.time.Clock()
+
+    baslik_font = pygame.font.SysFont("Segoe UI", 48, bold=True)
+    menu_font = pygame.font.SysFont("Segoe UI", 30, bold=True)
+    bilgi_font = pygame.font.SysFont("Segoe UI", 22)
+
+    # Zorluk tanımlarını ayarlar.py'deki katsayılardan dinamik oluştur
+    zorluklar = []
+    for zorluk_adi, katsayilar in ZORLUK_KATSAYILARI.items():
+        zorluklar.append({
+            "ad": zorluk_adi,
+            "ajan_sayisi": int(AJAN_SAYISI_TEMEL * katsayilar['ajan_sayisi_x']),
+            "karar_hz": int(AJAN_KARAR_HZ_TEMEL * katsayilar['karar_hz_x']),
+            "ogrenme_aralik": int(OGRENME_TIK_ARALIGI_TEMEL / katsayilar['ogrenme_aralik_x']),
+            "ogrenme_miktari": OGRENME_MIKTARI_TEMEL * katsayilar['ogrenme_miktari_x'],
+            "cikis_artis": CIKIS_BILGISI_ARTIS_TEMEL * katsayilar['cikis_artis_x'],
+            "baslangic_bekleme": int(SURU_BASLANGIC_BEKLEME_TIK_TEMEL * katsayilar['baslangic_bekleme_x']),
+        })
+
+    secili_zorluk = 1
+    kayitli_haritalar = HaritaYoneticisi.kayitli_haritalari_listele()
+    secili_harita_idx = 0
+    kayitli_harita_modu = len(kayitli_haritalar) > 0
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return None
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return None
+                if event.key == pygame.K_LEFT:
+                    secili_zorluk = (secili_zorluk - 1) % len(zorluklar)
+                elif event.key == pygame.K_RIGHT:
+                    secili_zorluk = (secili_zorluk + 1) % len(zorluklar)
+                elif event.key == pygame.K_k:
+                    if kayitli_haritalar:
+                        kayitli_harita_modu = not kayitli_harita_modu
+                elif event.key == pygame.K_q:
+                    if kayitli_harita_modu and kayitli_haritalar:
+                        secili_harita_idx = (secili_harita_idx - 1) % len(kayitli_haritalar)
+                elif event.key == pygame.K_e:
+                    if kayitli_harita_modu and kayitli_haritalar:
+                        secili_harita_idx = (secili_harita_idx + 1) % len(kayitli_haritalar)
+                elif event.key == pygame.K_RETURN:
+                    secim = dict(zorluklar[secili_zorluk])
+                    secim["harita_dosyasi"] = None
+                    if kayitli_harita_modu and kayitli_haritalar:
+                        secim["harita_dosyasi"] = kayitli_haritalar[secili_harita_idx]
+                    return secim
+
+        ekran.fill((14, 18, 24))
+        pygame.draw.rect(ekran, (30, 36, 44), pygame.Rect(90, 90, EKRAN_GENISLIK - 180, EKRAN_YUKSEKLIK - 180), border_radius=12)
+        pygame.draw.rect(ekran, (74, 168, 255), pygame.Rect(90, 90, EKRAN_GENISLIK - 180, EKRAN_YUKSEKLIK - 180), 2, border_radius=12)
+
+        ekran.blit(baslik_font.render("TERS LEMMINGS", True, (220, 230, 242)), (430, 140))
+        ekran.blit(menu_font.render("Gercek Oyun Menusu", True, (148, 202, 255)), (485, 205))
+
+        z = zorluklar[secili_zorluk]
+        ekran.blit(menu_font.render(f"Zorluk: {z['ad']}", True, (255, 236, 160)), (500, 300))
+        ekran.blit(bilgi_font.render(f"Ajan: {z['ajan_sayisi']}  |  Karar Hizi: {z['karar_hz']}/sn", True, (205, 214, 224)), (430, 355))
+        if kayitli_harita_modu and kayitli_haritalar:
+            secili_harita = kayitli_haritalar[secili_harita_idx].replace('\\', '/').split('/')[-1]
+            harita_satiri = f"Harita Modu: KAYITLI | Dosya: {secili_harita}"
+        else:
+            harita_satiri = "Harita Modu: YENI RASTGELE"
+
+        ekran.blit(bilgi_font.render(harita_satiri, True, (180, 222, 255)), (360, 400))
+        ekran.blit(bilgi_font.render("K: Mod Degistir | Q/E: Kayitli Harita Sec | Enter: Baslat | ESC: Cikis", True, (188, 196, 206)), (250, 440))
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+
+def duzenleme_modu(yuklenecek_harita_yolu=None):
     """Oyun başlamadan önce harita ve tuzakları düzenleme modu."""
     def yerlestir_arac(harita_yon, arac_secimi, arac_adlari, arac_kullanim, arac_limitleri, arac_listesi):
         mx, my = pygame.mouse.get_pos()
@@ -112,7 +160,7 @@ def duzenleme_modu():
                         if grid_x == 0 or grid_x == HARITA_GENISLIK_PARSEL-1 or grid_y == 0 or grid_y == HARITA_YUKSEKLIK_PARSEL-1:
                             parsel.uzerindeki_alet = CikisOku(grid_x, grid_y, harita_yon.aktif_katman, arac_secimi)
                             arac_kullanim[arac_adi] += 1
-                            if SES_ACIK and ses_arac_yerlestir:
+                            if SES_DURUM["efekt"] and ses_arac_yerlestir:
                                 ses_arac_yerlestir.play()
                     else:
                         arac_sinif = arac_listesi[arac_secimi]
@@ -121,18 +169,31 @@ def duzenleme_modu():
                         else:
                             parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman, arac_secimi)
                         arac_kullanim[arac_adi] += 1
-                        if SES_ACIK and ses_arac_yerlestir:
+                        if SES_DURUM["efekt"] and ses_arac_yerlestir:
                             ses_arac_yerlestir.play()
+
+    def kaldir_arac(harita_yon, arac_kullanim, arac_adlari):
+        mx, my = pygame.mouse.get_pos()
+        grid_x = mx // PARSEK_BOYUTU
+        grid_y = my // PARSEK_BOYUTU
+        if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
+            parsel = harita_yon.map_grid[harita_yon.aktif_katman][grid_y][grid_x]
+            if parsel and parsel.uzerindeki_alet:
+                arac_turu = parsel.uzerindeki_alet.arac_turu
+                if isinstance(arac_turu, int) and 0 <= arac_turu < len(arac_adlari):
+                    arac_adi = arac_adlari[arac_turu]
+                    arac_kullanim[arac_adi] = max(0, arac_kullanim[arac_adi] - 1)
+                parsel.uzerindeki_alet = None
 
     def etki_alani_goster(ekran, arac_secimi, arac_listesi):
         mx, my = pygame.mouse.get_pos()
         grid_x = mx // PARSEK_BOYUTU
         grid_y = my // PARSEK_BOYUTU
         if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
-            # Etki alanı ±1 (3x3x3)
-            for dz in range(-1, 2):
-                for dy in range(-1, 2):
-                    for dx in range(-1, 2):
+            # Etki alanı ±2 (5x5x5)
+            for dz in range(-ETKI_YARICAPI, ETKI_YARICAPI + 1):
+                for dy in range(-ETKI_YARICAPI, ETKI_YARICAPI + 1):
+                    for dx in range(-ETKI_YARICAPI, ETKI_YARICAPI + 1):
                         nx, ny = grid_x + dx, grid_y + dy
                         if 0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL:
                             px_x = nx * PARSEK_BOYUTU
@@ -142,21 +203,30 @@ def duzenleme_modu():
 
     pygame.init()
     pygame.font.init()
-    harita_yon = HaritaYoneticisi()
-    # Haritayı boş olarak başlat (tüm katmanları ZeminDuz ile doldur)
-    for kat in range(harita_yon.max_katman):
-        for y in range(HARITA_YUKSEKLIK_PARSEL):
-            for x in range(HARITA_GENISLIK_PARSEL):
-                harita_yon.map_grid[kat][y][x] = ZeminDuz(x, y, kat)
+    # Kullanici isterse onceki kayitli haritayi ac, yoksa yeni rastgele harita uret.
+    if yuklenecek_harita_yolu:
+        try:
+            harita_yon = HaritaYoneticisi.dosyadan_yukle(yuklenecek_harita_yolu)
+            print(f"Kayitli harita yuklendi: {yuklenecek_harita_yolu}")
+        except Exception as ex:
+            print(f"Kayitli harita yuklenemedi, rastgele haritaya donuluyor: {ex}")
+            harita_yon = HaritaYoneticisi()
+    else:
+        harita_yon = HaritaYoneticisi()
+
+    ses_menusu = SesAyarMenusu(sid_manager, SES_DURUM)
+    ses_menusu.uygula()
     
     ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
     pygame.display.set_caption("Ters Lemmings - Düzenleme Modu")
     clock = pygame.time.Clock()
     
     try:
-        font = pygame.font.SysFont("Segoe UI Emoji", PARSEK_BOYUTU - 4)
+        font = pygame.font.SysFont("Segoe UI Emoji", PARSEK_BOYUTU - 4, bold=True)
+        ui_font = pygame.font.SysFont("Segoe UI", 22, bold=True)
     except:
         font = pygame.font.SysFont(None, PARSEK_BOYUTU)
+        ui_font = pygame.font.SysFont(None, 22, bold=True)
     
     arac_secimi = 0  # 0: Mancinik, 1: Ayna, 2: Bariyer, 3: Ateş, 4: Çıkış Oku, 5: Sahte Yol, 6: Sendeletme Tası, 7: Gizli Çukur, 8: Kıyma Makinesi, 9: Yönlendirici
     arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici]
@@ -172,10 +242,12 @@ def duzenleme_modu():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
+                if ses_menusu.tus_isle(event):
+                    continue
                 if event.key == pygame.K_UP:
-                    harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman - 1)
-                elif event.key == pygame.K_DOWN:
                     harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman + 1)
+                elif event.key == pygame.K_DOWN:
+                    harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman - 1)
                 elif event.key == pygame.K_1:
                     arac_secimi = 0
                 elif event.key == pygame.K_2:
@@ -197,16 +269,22 @@ def duzenleme_modu():
                 elif event.key == pygame.K_0:
                     arac_secimi = 9
                 elif event.key == pygame.K_s:
-                    # Kaydet
-                    print("Harita kaydedildi.")
+                    # Haritayi manuel olarak kaydetmek icin S kisayolu.
+                    try:
+                        kayit_yolu = harita_yon.haritayi_kaydet()
+                        print(f"Harita kaydedildi: {kayit_yolu}")
+                    except Exception as ex:
+                        print(f"Harita kaydetme hatasi: {ex}")
+                elif event.key == pygame.K_RETURN:
+                    return harita_yon  # Düzenleme tamam, oyuna geç
                 elif event.key == pygame.K_ESCAPE:
-                    calisiyor = False  # Düzenleme bitir, oyun başlat
+                    return None  # Ana menüye geri dön
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Sol tıklama - yerleştir
                     mouse_basili = True
                     yerlestir_arac(harita_yon, arac_secimi, arac_adlari, arac_kullanim, arac_limitleri, arac_listesi)
                 elif event.button == 3:  # Sağ tıklama - kaldır
-                    kaldir_arac(harita_yon, arac_kullanim)
+                    kaldir_arac(harita_yon, arac_kullanim, arac_adlari)
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     mouse_basili = False
@@ -243,97 +321,260 @@ def duzenleme_modu():
         
         # UI
         arac_adi = arac_adlari[arac_secimi]
-        ui_yazi = f"Katman: {harita_yon.aktif_katman} | Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | 1-0: Araç Seç | S: Kaydet | ESC: Oyun Başlat"
-        ui_surf = font.render(ui_yazi, True, (255, 255, 255))
-        ekran.blit(ui_surf, (10, EKRAN_YUKSEKLIK - 30))
+        if ses_menusu.acik:
+            ses_menusu.ciz(ekran, ui_font)
+        else:
+            cubuk_y = HARITA_ALAN_YUKSEKLIK
+            pygame.draw.rect(ekran, KOYU_GRI, pygame.Rect(0, cubuk_y, EKRAN_GENISLIK, DURUM_CUBUGU_YUKSEKLIK))
+            pygame.draw.line(ekran, GRI, (0, cubuk_y), (EKRAN_GENISLIK, cubuk_y), 2)
+            ui_yazi = (
+                f"Katman: {harita_yon.aktif_katman + 1}/{harita_yon.max_katman} | "
+                f"Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | "
+                "Etki: 5x5x5 | Yukari/Asagi: Katman | ENTER: Oyuna Gec | ESC: Menu | F1: Ses"
+            )
+            ui_surf = ui_font.render(ui_yazi, True, (235, 235, 235))
+            ekran.blit(ui_surf, (10, cubuk_y + 16))
         
         pygame.display.flip()
         clock.tick(FPS)
     
-    return harita_yon  # Düzenlenmiş haritayı döndür
+    return None
 
 def main():
-    # --- 0. Düzenleme Modu ---
-    print("Düzenleme modu başlatılıyor...")
-    harita_yon = duzenleme_modu()
-    harita_yon.cikis_oklarini_kapiya_cevir()  # Çıkış oklarını kapıya çevir
-    
-    # --- 1. Başlangıç Ayarları ---
-    pygame.init()
-    pygame.font.init()
-    
-    ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
-    pygame.display.set_caption("Ters Lemmings - Sürü Simülasyonu Testi")
-    clock = pygame.time.Clock()
+    while True:
+        zorluk_ayari = baslangic_menusu()
+        if zorluk_ayari is None:
+            pygame.quit()
+            sys.exit()
 
-    try:
-        oyun_fontu = pygame.font.SysFont("Segoe UI Emoji", PARSEK_BOYUTU - 4)
-    except:
-        oyun_fontu = pygame.font.SysFont(None, PARSEK_BOYUTU)
+        suru_mod.AJAN_KARAR_HZ = zorluk_ayari["karar_hz"]
+        suru_mod.OGRENME_TIK_ARALIGI = zorluk_ayari["ogrenme_aralik"]
+        suru_mod.OGRENME_MIKTARI = zorluk_ayari["ogrenme_miktari"]
+        suru_mod.CIKIS_BILGISI_ARTIS = zorluk_ayari["cikis_artis"]
+        suru_mod.SURU_BASLANGIC_BEKLEME_TIK = zorluk_ayari["baslangic_bekleme"]
 
-    # --- 2. Harita zaten düzenleme modunda oluşturuldu ---
+        print("Duzenleme modu baslatiliyor...")
+        harita_yon = duzenleme_modu(zorluk_ayari.get("harita_dosyasi"))
+        if harita_yon is None:
+            continue
+        harita_yon.cikis_oklarini_kapiya_cevir()
+        # Her oyun baslangicinda aktif haritanin bir kopyasi haritalar klasorune kaydedilir.
+        try:
+            otomatik_kayit = harita_yon.haritayi_kaydet()
+            print(f"Otomatik harita kaydi: {otomatik_kayit}")
+        except Exception as ex:
+            print(f"Otomatik harita kaydi basarisiz: {ex}")
 
-    # --- 3. Sürü Yöneticisini Başlat ve Sürüyü Doğur ---
-    suru_yon = SuruYoneticisi(harita_yon)
-    
-    # Giriş noktasında sürüyü yarat
-    suru_yon.suru_yarat(baslangic_x=harita_yon.giris_x, baslangic_y=harita_yon.giris_y, boyut=AJAN_SAYISI)
+        pygame.init()
+        pygame.font.init()
+        ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
+        pygame.display.set_caption("Ters Lemmings - Sürü Simülasyonu Testi")
+        clock = pygame.time.Clock()
 
-    # --- 4. Oyun Yöneticisini Başlat ---
-    oyun_yon = OyunYoneticisi(suru_yon)
-    
-    # --- 4. Ana Oyun Döngüsü ---
-    calisiyor = True
-    while calisiyor:
-        # A. Olayları Dinle (Input Handling)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                calisiyor = False
-            
-            # Klavye Kontrolleri (Katman Değiştirme)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman + 1)
-                elif event.key == pygame.K_DOWN:
-                    harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman - 1)
-            
-            # Fare Kontrolleri (Alet Yerleştirme)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Sol tıklama
-                    mx, my = pygame.mouse.get_pos()
-                    grid_x = mx // PARSEK_BOYUTU
-                    grid_y = my // PARSEK_BOYUTU
-                    if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
-                        parsel = harita_yon.map_grid[harita_yon.aktif_katman][grid_y][grid_x]
-                        if parsel.uzerindeki_alet is None:
-                            parsel.uzerindeki_alet = Mancinik(grid_x, grid_y, harita_yon.aktif_katman, 'sert')
-                            if SES_ACIK and ses_arac_yerlestir:
-                                ses_arac_yerlestir.play()
+        try:
+            oyun_fontu = pygame.font.SysFont("Segoe UI Emoji", PARSEK_BOYUTU - 4, bold=True)
+            ui_fontu = pygame.font.SysFont("Segoe UI", 22, bold=True)
+        except:
+            oyun_fontu = pygame.font.SysFont(None, PARSEK_BOYUTU)
+            ui_fontu = pygame.font.SysFont(None, 22, bold=True)
 
-        # B. Oyun Mantığını Güncelle (Update)
-        # Araç etkilerini uygula
-        harita_yon.arac_etkilerini_uygula(suru_yon.ajanlar)
-        # Sürünün beyni burada çalışıyor, lider karar veriyor, kuyruk takip ediyor.
-        suru_yon.guncelle()
-        oyun_yon.guncelle()
-        # SID müzik güncelle
+        ses_menusu = SesAyarMenusu(sid_manager, SES_DURUM)
+        ses_menusu.uygula()
+
+        suru_yon = SuruYoneticisi(harita_yon)
+        suru_yon.suru_yarat(harita_yon.giris_x, harita_yon.giris_y, zorluk_ayari["ajan_sayisi"])
+        oyun_yon = OyunYoneticisi(suru_yon, SES_DURUM, ses_ajan_ol)
+        log_yon = OyunKayitYonetici()
+        log_yon.baslangic(zorluk_ayari, len(suru_yon.ajanlar))
+
+        arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici]
+        arac_adlari = ['Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku', 'SahteYol', 'SendeletmeTasi', 'GizliCukur', 'KiymaMakinesi', 'Yonlendirici']
+        arac_limitleri = {'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI, 'CikisOku': CIKIS_OKU_SAYISI, 'SahteYol': SAHTE_YOL_SAYISI, 'SendeletmeTasi': SENDELETME_TASI_SAYISI, 'GizliCukur': GIZLI_CUKUR_SAYISI, 'KiymaMakinesi': KIYMA_MAKINESI_SAYISI, 'Yonlendirici': YONLENDIRICI_SAYISI}
+        arac_kullanim = {ad: 0 for ad in arac_adlari}
+        arac_secimi = 0
+
+        for kat in range(harita_yon.max_katman):
+            for y in range(HARITA_YUKSEKLIK_PARSEL):
+                for x in range(HARITA_GENISLIK_PARSEL):
+                    parsel = harita_yon.map_grid[kat][y][x]
+                    if parsel and parsel.uzerindeki_alet:
+                        tur = parsel.uzerindeki_alet.arac_turu
+                        if isinstance(tur, int) and 0 <= tur < len(arac_adlari):
+                            arac_kullanim[arac_adlari[tur]] += 1
+
+        def oyunda_arac_yerlestir():
+            mx, my = pygame.mouse.get_pos()
+            grid_x = mx // PARSEK_BOYUTU
+            grid_y = my // PARSEK_BOYUTU
+            if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
+                parsel = harita_yon.map_grid[harita_yon.aktif_katman][grid_y][grid_x]
+                if parsel.uzerindeki_alet is None:
+                    arac_adi = arac_adlari[arac_secimi]
+                    if arac_kullanim[arac_adi] < arac_limitleri[arac_adi]:
+                        try:
+                            arac_sinif = arac_listesi[arac_secimi]
+                            if arac_sinif == Mancinik:
+                                parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman, 'sert', arac_secimi)
+                            else:
+                                parsel.uzerindeki_alet = arac_sinif(grid_x, grid_y, harita_yon.aktif_katman, arac_secimi)
+                            if arac_sinif == Bariyer:
+                                parsel.yurunebilir = False
+                            arac_kullanim[arac_adi] += 1
+                        except Exception as ex:
+                            print(f"Arac yerlestirme hatasi ({arac_adi}): {ex}")
+
+        def oyunda_arac_kaldir():
+            mx, my = pygame.mouse.get_pos()
+            grid_x = mx // PARSEK_BOYUTU
+            grid_y = my // PARSEK_BOYUTU
+            if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
+                parsel = harita_yon.map_grid[harita_yon.aktif_katman][grid_y][grid_x]
+                if parsel and parsel.uzerindeki_alet:
+                    tur = parsel.uzerindeki_alet.arac_turu
+                    if isinstance(tur, int) and 0 <= tur < len(arac_adlari):
+                        arac_kullanim[arac_adlari[tur]] = max(0, arac_kullanim[arac_adlari[tur]] - 1)
+                    parsel.uzerindeki_alet = None
+                    parsel.yurunebilir = True
+
+        def oyunda_etki_alani_goster(surface):
+            mx, my = pygame.mouse.get_pos()
+            grid_x = mx // PARSEK_BOYUTU
+            grid_y = my // PARSEK_BOYUTU
+            if 0 <= grid_x < HARITA_GENISLIK_PARSEL and 0 <= grid_y < HARITA_YUKSEKLIK_PARSEL:
+                for dy in range(-ETKI_YARICAPI, ETKI_YARICAPI + 1):
+                    for dx in range(-ETKI_YARICAPI, ETKI_YARICAPI + 1):
+                        nx, ny = grid_x + dx, grid_y + dy
+                        if 0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL:
+                            px_x = nx * PARSEK_BOYUTU
+                            px_y = ny * PARSEK_BOYUTU
+                            pygame.draw.rect(surface, (255, 255, 0), pygame.Rect(px_x, px_y, PARSEK_BOYUTU, PARSEK_BOYUTU), 2)
+
+        ajan_izleyici = AjanIzlemePenceresi(kutu_sayisi=50)
+        calisiyor = True
+        oyun_sonucu = "menu"
+        kare_sayaci = 0
+
+        while calisiyor:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    calisiyor = False
+                    oyun_sonucu = "quit"
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        secim = oyun_ici_menu(ekran, ui_fontu, ui_fontu, clock)
+                        if secim == "quit":
+                            calisiyor = False
+                            oyun_sonucu = "quit"
+                        elif secim == "menu":
+                            calisiyor = False
+                            oyun_sonucu = "menu"
+                        continue
+
+                    if ses_menusu.tus_isle(event):
+                        continue
+                    if event.key == pygame.K_F2:
+                        ajan_izleyici.ac_kapat()
+                        continue
+                    if event.key == pygame.K_UP:
+                        harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman + 1)
+                    elif event.key == pygame.K_DOWN:
+                        harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman - 1)
+                    elif event.key == pygame.K_1:
+                        arac_secimi = 0
+                    elif event.key == pygame.K_2:
+                        arac_secimi = 1
+                    elif event.key == pygame.K_3:
+                        arac_secimi = 2
+                    elif event.key == pygame.K_4:
+                        arac_secimi = 3
+                    elif event.key == pygame.K_5:
+                        arac_secimi = 4
+                    elif event.key == pygame.K_6:
+                        arac_secimi = 5
+                    elif event.key == pygame.K_7:
+                        arac_secimi = 6
+                    elif event.key == pygame.K_8:
+                        arac_secimi = 7
+                    elif event.key == pygame.K_9:
+                        arac_secimi = 8
+                    elif event.key == pygame.K_0:
+                        arac_secimi = 9
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        oyunda_arac_yerlestir()
+                        if ses_menusu.efekt_aktif() and ses_arac_yerlestir:
+                            ses_arac_yerlestir.play()
+                    elif event.button == 3:
+                        oyunda_arac_kaldir()
+
+            if not calisiyor:
+                break
+
+            harita_yon.arac_etkilerini_uygula(suru_yon.ajanlar)
+            suru_yon.guncelle()
+            oyun_yon.guncelle()
+            ajan_izleyici.guncelle(suru_yon.ajanlar)
+
+            log_yon.olaylari_yaz(suru_yon.olum_olaylarini_al())
+            kare_sayaci += 1
+            if kare_sayaci % max(1, LOG_KARE_ARALIGI) == 0:
+                log_yon.anlik_durum_yaz(suru_yon.toplam_tick, suru_yon.ajanlar)
+
+            if sid_manager.available:
+                sid_manager.update()
+
+            harita_yon.render(ekran, oyun_fontu)
+            suru_yon.render(ekran, oyun_fontu, harita_yon.aktif_katman)
+            if harita_yon.aktif_katman == harita_yon.giris_katman:
+                giris_px_x = harita_yon.giris_x * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
+                giris_px_y = harita_yon.giris_y * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
+                pygame.draw.polygon(ekran, (255, 255, 255), [
+                    (giris_px_x - 10, giris_px_y),
+                    (giris_px_x + 10, giris_px_y - 10),
+                    (giris_px_x + 10, giris_px_y + 10)
+                ])
+
+            oyunda_etki_alani_goster(ekran)
+            oyun_yon.render(ekran, oyun_fontu)
+
+            arac_adi = arac_adlari[arac_secimi]
+            secili_arac_etiketi_ciz(ekran, ui_fontu, arac_adi)
+            if ses_menusu.acik:
+                ses_menusu.ciz(ekran, ui_fontu)
+            else:
+                cubuk_y = HARITA_ALAN_YUKSEKLIK
+                pygame.draw.rect(ekran, KOYU_GRI, pygame.Rect(0, cubuk_y, EKRAN_GENISLIK, DURUM_CUBUGU_YUKSEKLIK))
+                pygame.draw.line(ekran, GRI, (0, cubuk_y), (EKRAN_GENISLIK, cubuk_y), 2)
+                bilgi = (
+                    f"Katman: {harita_yon.aktif_katman + 1}/{harita_yon.max_katman} | "
+                    f"Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | "
+                    "Etki: 5x5x5 | 1-0 sec | Sol: yerlestir | Sag: kaldir | Yukari/Asagi: Katman | ESC: Oyun Menusu | F1: Ses | F2: Ajan Penceresi"
+                )
+                ekran.blit(ui_fontu.render(bilgi, True, (235, 235, 235)), (10, cubuk_y + 8))
+                # Faz 8 madde 3: araç mini satırı — tüm araçların kısayol/miktar özeti
+                _harf = '1234567890'
+                _kisa_adlar = ['Mnc', 'Ayn', 'Bar', 'Ats', 'CkO', 'ShY', 'Snd', 'GCk', 'KMk', 'Ynl']
+                mini_parcalar = [
+                    f"[{_harf[i]}]{_kisa_adlar[i]}:{arac_kullanim.get(arac_adlari[i],0)}/{arac_limitleri.get(arac_adlari[i],0)}"
+                    for i in range(len(arac_adlari))
+                ]
+                mini_yazi = '  '.join(mini_parcalar)
+                mini_surf = ui_fontu.render(mini_yazi, True, (200, 215, 235))
+                ekran.blit(mini_surf, (10, cubuk_y + 34))
+
+            pygame.display.flip()
+            clock.tick(FPS)
+
         if sid_manager.available:
-            sid_manager.update()
+            sid_manager.stop()
+        ajan_izleyici.tamamen_kapat()
+        log_yon.kapat()
 
-        # C. Ekrana Çiz (Render)
-        # Önce haritayı, onun üstüne de sürüyü çiziyoruz.
-        harita_yon.render(ekran, oyun_fontu)
-        suru_yon.render(ekran, oyun_fontu, harita_yon.aktif_katman)
-        oyun_yon.render(ekran, oyun_fontu)
+        if oyun_sonucu == "menu":
+            continue
 
-        pygame.display.flip() # Çizilenleri ekrana yansıt
-        clock.tick(FPS)       # Döngü hızını sabitle
-
-    # --- 5. Çıkış ---
-    if sid_manager.available:
-        sid_manager.stop()
-    pygame.quit()
-    sys.exit()
+        pygame.quit()
+        sys.exit()
 
 if __name__ == "__main__":
     main()
