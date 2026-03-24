@@ -4,7 +4,30 @@ import sys
 import struct
 import suru_yoneticisi as suru_mod
 from ayarlar import *  # AJAN_SAYISI, AJAN_HIZI, araç sayıları dahil
-from harita_yoneticisi import HaritaYoneticisi, Mancinik, Ayna, Bariyer, Ates, CikisOku, ZeminDuz, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici
+from harita_yoneticisi import (
+    HaritaYoneticisi,
+    Mancinik,
+    Ayna,
+    Bariyer,
+    Ates,
+    CikisOku,
+    ZeminDuz,
+    SahteYol,
+    SendeletmeTasi,
+    GizliCukur,
+    KiymaMakinesi,
+    Yonlendirici,
+    FeromonIstasyonu,
+    OforiGazi,
+    KorkuGazi,
+    DonmaAlani,
+    DepresifAlan,
+    SosyalAyna,
+    EngelYansitici,
+    SesYayici,
+    GolgeRehber,
+    KaosCekirdegi,
+)
 from suru_yoneticisi import SuruYoneticisi # Yeni motorumuzu dahil ediyoruz
 from sid_player import SidMusicManager
 from oyun_bilesenleri import (
@@ -12,6 +35,7 @@ from oyun_bilesenleri import (
     AjanIzlemePenceresi,
     OyunKayitYonetici,
     OyunYoneticisi,
+    AracPaneli,
     secili_arac_etiketi_ciz,
     oyun_ici_menu,
 )
@@ -62,12 +86,73 @@ SES_DURUM = {"efekt": SES_ACIK}
 # Bu dosya artik sadece oyun akisina odaklanir; detayli bileşenler oyun_bilesenleri.py icine ayrildi.
 
 
+def ciz_giris_cikis_isaretleri(ekran, harita_yon):
+    if harita_yon.aktif_katman == harita_yon.giris_katman:
+        giris_px_x = harita_yon.giris_x * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
+        giris_px_y = harita_yon.giris_y * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
+        pygame.draw.circle(ekran, (245, 245, 245), (giris_px_x, giris_px_y), 14, 3)
+        pygame.draw.polygon(ekran, (255, 255, 255), [
+            (giris_px_x - 10, giris_px_y),
+            (giris_px_x + 10, giris_px_y - 10),
+            (giris_px_x + 10, giris_px_y + 10)
+        ])
+
+    if harita_yon.aktif_katman == harita_yon.cikis_katman:
+        cikis_px_x = harita_yon.cikis_x * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
+        cikis_px_y = harita_yon.cikis_y * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
+        pygame.draw.circle(ekran, (60, 220, 80), (cikis_px_x, cikis_px_y), 14, 3)
+        pygame.draw.polygon(ekran, (0, 160, 0), [
+            (cikis_px_x + 10, cikis_px_y),
+            (cikis_px_x - 10, cikis_px_y - 10),
+            (cikis_px_x - 10, cikis_px_y + 10)
+        ])
+
+
+def mod_dugmeleri_uret(suru_yon):
+    taban_x = 10
+    taban_y = 42
+    dugme_w = 118
+    dugme_h = 28
+    bosluk = 8
+    sira = [
+        ("normal", "Normal"),
+        ("kesif", "Kesif"),
+        ("gezinti", "Gezinti"),
+        ("yol_izleme", "Yol Izleme"),
+    ]
+    dugmeler = []
+    for i, (mod, etiket) in enumerate(sira):
+        rx = taban_x + i * (dugme_w + bosluk)
+        ry = taban_y
+        dugmeler.append({"mod": mod, "etiket": etiket, "rect": pygame.Rect(rx, ry, dugme_w, dugme_h)})
+    return dugmeler
+
+
+def ciz_mod_dugmeleri(ekran, font, suru_yon):
+    dugmeler = mod_dugmeleri_uret(suru_yon)
+    for d in dugmeler:
+        aktif = (suru_yon.oyun_modu == d["mod"])
+        dolgu = (38, 84, 152) if aktif else (26, 32, 42)
+        kenar = (122, 190, 255) if aktif else (82, 98, 120)
+        pygame.draw.rect(ekran, dolgu, d["rect"], border_radius=6)
+        pygame.draw.rect(ekran, kenar, d["rect"], 2, border_radius=6)
+        txt = font.render(d["etiket"], True, (238, 245, 255))
+        ekran.blit(
+            txt,
+            (
+                d["rect"].x + d["rect"].width // 2 - txt.get_width() // 2,
+                d["rect"].y + d["rect"].height // 2 - txt.get_height() // 2,
+            ),
+        )
+    return dugmeler
+
+
 def baslangic_menusu():
     """Gerçek başlangıç menüsü: başlat/çıkış ve zorluk seçimi."""
     pygame.init()
     pygame.font.init()
 
-    ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
+    ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK), pygame.RESIZABLE)
     pygame.display.set_caption("Ters Lemmings - Baslangic Menusu")
     clock = pygame.time.Clock()
 
@@ -86,6 +171,8 @@ def baslangic_menusu():
             "ogrenme_miktari": OGRENME_MIKTARI_TEMEL * katsayilar['ogrenme_miktari_x'],
             "cikis_artis": CIKIS_BILGISI_ARTIS_TEMEL * katsayilar['cikis_artis_x'],
             "baslangic_bekleme": int(SURU_BASLANGIC_BEKLEME_TIK_TEMEL * katsayilar['baslangic_bekleme_x']),
+            "duygu_sonum_aralik": max(2, int(DUYGU_SONUM_TIK_ARALIGI_TEMEL / max(0.35, katsayilar['karar_hz_x']))),
+            "grup_koruma_tik": int(SURU_GRUP_KORUMA_TIK_TEMEL * (1.15 if zorluk_adi == 'Kolay' else (1.0 if zorluk_adi == 'Orta' else 0.9))),
         })
 
     secili_zorluk = 1
@@ -147,6 +234,8 @@ def baslangic_menusu():
 def duzenleme_modu(yuklenecek_harita_yolu=None):
     """Oyun başlamadan önce harita ve tuzakları düzenleme modu."""
     def yerlestir_arac(harita_yon, arac_secimi, arac_adlari, arac_kullanim, arac_limitleri, arac_listesi):
+        if arac_secimi < 0 or arac_secimi >= len(arac_listesi):
+            return
         mx, my = pygame.mouse.get_pos()
         grid_x = mx // PARSEK_BOYUTU
         grid_y = my // PARSEK_BOYUTU
@@ -217,7 +306,7 @@ def duzenleme_modu(yuklenecek_harita_yolu=None):
     ses_menusu = SesAyarMenusu(sid_manager, SES_DURUM)
     ses_menusu.uygula()
     
-    ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
+    ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK), pygame.RESIZABLE)
     pygame.display.set_caption("Ters Lemmings - Düzenleme Modu")
     clock = pygame.time.Clock()
     
@@ -228,11 +317,32 @@ def duzenleme_modu(yuklenecek_harita_yolu=None):
         font = pygame.font.SysFont(None, PARSEK_BOYUTU)
         ui_font = pygame.font.SysFont(None, 22, bold=True)
     
-    arac_secimi = 0  # 0: Mancinik, 1: Ayna, 2: Bariyer, 3: Ateş, 4: Çıkış Oku, 5: Sahte Yol, 6: Sendeletme Tası, 7: Gizli Çukur, 8: Kıyma Makinesi, 9: Yönlendirici
-    arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici]
-    arac_adlari = ['Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku', 'SahteYol', 'SendeletmeTasi', 'GizliCukur', 'KiymaMakinesi', 'Yonlendirici']
-    arac_kullanim = {'Mancinik': 0, 'Ayna': 0, 'Bariyer': 0, 'Ates': 0, 'CikisOku': 0, 'SahteYol': 0, 'SendeletmeTasi': 0, 'GizliCukur': 0, 'KiymaMakinesi': 0, 'Yonlendirici': 0}
-    arac_limitleri = {'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI, 'CikisOku': CIKIS_OKU_SAYISI, 'SahteYol': SAHTE_YOL_SAYISI, 'SendeletmeTasi': SENDELETME_TASI_SAYISI, 'GizliCukur': GIZLI_CUKUR_SAYISI, 'KiymaMakinesi': KIYMA_MAKINESI_SAYISI, 'Yonlendirici': YONLENDIRICI_SAYISI}
+    arac_secimi = 0
+    arac_listesi = [
+        Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici,
+        FeromonIstasyonu, OforiGazi, KorkuGazi, DonmaAlani, DepresifAlan, SosyalAyna, EngelYansitici, SesYayici, GolgeRehber, KaosCekirdegi,
+    ]
+    arac_adlari = [
+        'Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku', 'SahteYol', 'SendeletmeTasi', 'GizliCukur', 'KiymaMakinesi', 'Yonlendirici',
+        'FeromonIstasyonu', 'OforiGazi', 'KorkuGazi', 'DonmaAlani', 'DepresifAlan', 'SosyalAyna', 'EngelYansitici', 'SesYayici', 'GolgeRehber', 'KaosCekirdegi'
+    ]
+    arac_kullanim = {ad: 0 for ad in arac_adlari}
+    arac_limitleri = {
+        'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI,
+        'CikisOku': CIKIS_OKU_SAYISI, 'SahteYol': SAHTE_YOL_SAYISI, 'SendeletmeTasi': SENDELETME_TASI_SAYISI,
+        'GizliCukur': GIZLI_CUKUR_SAYISI, 'KiymaMakinesi': KIYMA_MAKINESI_SAYISI, 'Yonlendirici': YONLENDIRICI_SAYISI,
+        'FeromonIstasyonu': FEROMON_ISTASYONU_SAYISI,
+        'OforiGazi': OFORI_GAZI_SAYISI,
+        'KorkuGazi': KORKU_GAZI_SAYISI,
+        'DonmaAlani': DONMA_ALANI_SAYISI,
+        'DepresifAlan': DEPRESIF_ALAN_SAYISI,
+        'SosyalAyna': SOSYAL_AYNA_SAYISI,
+        'EngelYansitici': ENGEL_YANSITICI_SAYISI,
+        'SesYayici': SES_YAYICI_SAYISI,
+        'GolgeRehber': GOLGE_REHBER_SAYISI,
+        'KaosCekirdegi': KAOS_CEKIRDEGI_SAYISI,
+    }
+    arac_paneli = AracPaneli(arac_adlari, mevcut_arac_sayisi=len(arac_listesi))
     
     calisiyor = True
     mouse_basili = False
@@ -248,26 +358,8 @@ def duzenleme_modu(yuklenecek_harita_yolu=None):
                     harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman + 1)
                 elif event.key == pygame.K_DOWN:
                     harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman - 1)
-                elif event.key == pygame.K_1:
-                    arac_secimi = 0
-                elif event.key == pygame.K_2:
-                    arac_secimi = 1
-                elif event.key == pygame.K_3:
-                    arac_secimi = 2
-                elif event.key == pygame.K_4:
-                    arac_secimi = 3
-                elif event.key == pygame.K_5:
-                    arac_secimi = 4
-                elif event.key == pygame.K_6:
-                    arac_secimi = 5
-                elif event.key == pygame.K_7:
-                    arac_secimi = 6
-                elif event.key == pygame.K_8:
-                    arac_secimi = 7
-                elif event.key == pygame.K_9:
-                    arac_secimi = 8
-                elif event.key == pygame.K_0:
-                    arac_secimi = 9
+                elif arac_paneli.klavye_secimi(event):
+                    arac_secimi = arac_paneli.secili_index
                 elif event.key == pygame.K_s:
                     # Haritayi manuel olarak kaydetmek icin S kisayolu.
                     try:
@@ -280,6 +372,9 @@ def duzenleme_modu(yuklenecek_harita_yolu=None):
                 elif event.key == pygame.K_ESCAPE:
                     return None  # Ana menüye geri dön
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                if arac_paneli.mouse_secimi(event):
+                    arac_secimi = arac_paneli.secili_index
+                    continue
                 if event.button == 1:  # Sol tıklama - yerleştir
                     mouse_basili = True
                     yerlestir_arac(harita_yon, arac_secimi, arac_adlari, arac_kullanim, arac_limitleri, arac_listesi)
@@ -298,39 +393,21 @@ def duzenleme_modu(yuklenecek_harita_yolu=None):
         if arac_secimi >= 0:
             etki_alani_goster(ekran, arac_secimi, arac_listesi)
         
-        # Giriş/Çıkış okları
-        if harita_yon.aktif_katman == harita_yon.giris_katman:
-            # Giriş oku: Beyaz, içeri (sol)
-            giris_px_x = harita_yon.giris_x * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
-            giris_px_y = harita_yon.giris_y * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
-            pygame.draw.polygon(ekran, (255, 255, 255), [
-                (giris_px_x - 10, giris_px_y),
-                (giris_px_x + 10, giris_px_y - 10),
-                (giris_px_x + 10, giris_px_y + 10)
-            ])
-        
-        if harita_yon.aktif_katman == harita_yon.cikis_katman:
-            # Çıkış oku: Koyu yeşil, dışarı (sağ)
-            cikis_px_x = harita_yon.cikis_x * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
-            cikis_px_y = harita_yon.cikis_y * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
-            pygame.draw.polygon(ekran, (0, 128, 0), [
-                (cikis_px_x + 10, cikis_px_y),
-                (cikis_px_x - 10, cikis_px_y - 10),
-                (cikis_px_x - 10, cikis_px_y + 10)
-            ])
+        ciz_giris_cikis_isaretleri(ekran, harita_yon)
+        arac_paneli.ciz(ekran, ui_font, arac_kullanim, arac_limitleri)
         
         # UI
         arac_adi = arac_adlari[arac_secimi]
         if ses_menusu.acik:
             ses_menusu.ciz(ekran, ui_font)
         else:
-            cubuk_y = HARITA_ALAN_YUKSEKLIK
+            cubuk_y = HARITA_ALAN_YUKSEKLIK + ARAC_PANEL_YUKSEKLIK
             pygame.draw.rect(ekran, KOYU_GRI, pygame.Rect(0, cubuk_y, EKRAN_GENISLIK, DURUM_CUBUGU_YUKSEKLIK))
             pygame.draw.line(ekran, GRI, (0, cubuk_y), (EKRAN_GENISLIK, cubuk_y), 2)
             ui_yazi = (
                 f"Katman: {harita_yon.aktif_katman + 1}/{harita_yon.max_katman} | "
                 f"Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | "
-                "Etki: 5x5x5 | Yukari/Asagi: Katman | ENTER: Oyuna Gec | ESC: Menu | F1: Ses"
+                "Etki: 5x5x5 | 1-0 ve Shift+1-0 sec | Yukari/Asagi: Katman | ENTER: Oyuna Gec | ESC: Menu | F1: Ses"
             )
             ui_surf = ui_font.render(ui_yazi, True, (235, 235, 235))
             ekran.blit(ui_surf, (10, cubuk_y + 16))
@@ -352,6 +429,8 @@ def main():
         suru_mod.OGRENME_MIKTARI = zorluk_ayari["ogrenme_miktari"]
         suru_mod.CIKIS_BILGISI_ARTIS = zorluk_ayari["cikis_artis"]
         suru_mod.SURU_BASLANGIC_BEKLEME_TIK = zorluk_ayari["baslangic_bekleme"]
+        suru_mod.DUYGU_SONUM_TIK_ARALIGI = zorluk_ayari["duygu_sonum_aralik"]
+        suru_mod.SURU_GRUP_KORUMA_TIK = zorluk_ayari["grup_koruma_tik"]
 
         print("Duzenleme modu baslatiliyor...")
         harita_yon = duzenleme_modu(zorluk_ayari.get("harita_dosyasi"))
@@ -367,7 +446,7 @@ def main():
 
         pygame.init()
         pygame.font.init()
-        ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK))
+        ekran = pygame.display.set_mode((EKRAN_GENISLIK, EKRAN_YUKSEKLIK), pygame.RESIZABLE)
         pygame.display.set_caption("Ters Lemmings - Sürü Simülasyonu Testi")
         clock = pygame.time.Clock()
 
@@ -387,11 +466,32 @@ def main():
         log_yon = OyunKayitYonetici()
         log_yon.baslangic(zorluk_ayari, len(suru_yon.ajanlar))
 
-        arac_listesi = [Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici]
-        arac_adlari = ['Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku', 'SahteYol', 'SendeletmeTasi', 'GizliCukur', 'KiymaMakinesi', 'Yonlendirici']
-        arac_limitleri = {'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI, 'CikisOku': CIKIS_OKU_SAYISI, 'SahteYol': SAHTE_YOL_SAYISI, 'SendeletmeTasi': SENDELETME_TASI_SAYISI, 'GizliCukur': GIZLI_CUKUR_SAYISI, 'KiymaMakinesi': KIYMA_MAKINESI_SAYISI, 'Yonlendirici': YONLENDIRICI_SAYISI}
+        arac_listesi = [
+            Mancinik, Ayna, Bariyer, Ates, CikisOku, SahteYol, SendeletmeTasi, GizliCukur, KiymaMakinesi, Yonlendirici,
+            FeromonIstasyonu, OforiGazi, KorkuGazi, DonmaAlani, DepresifAlan, SosyalAyna, EngelYansitici, SesYayici, GolgeRehber, KaosCekirdegi,
+        ]
+        arac_adlari = [
+            'Mancinik', 'Ayna', 'Bariyer', 'Ates', 'CikisOku', 'SahteYol', 'SendeletmeTasi', 'GizliCukur', 'KiymaMakinesi', 'Yonlendirici',
+            'FeromonIstasyonu', 'OforiGazi', 'KorkuGazi', 'DonmaAlani', 'DepresifAlan', 'SosyalAyna', 'EngelYansitici', 'SesYayici', 'GolgeRehber', 'KaosCekirdegi'
+        ]
+        arac_limitleri = {
+            'Mancinik': MANCINIK_SAYISI, 'Ayna': AYNA_SAYISI, 'Bariyer': BARIYER_SAYISI, 'Ates': ATES_SAYISI,
+            'CikisOku': CIKIS_OKU_SAYISI, 'SahteYol': SAHTE_YOL_SAYISI, 'SendeletmeTasi': SENDELETME_TASI_SAYISI,
+            'GizliCukur': GIZLI_CUKUR_SAYISI, 'KiymaMakinesi': KIYMA_MAKINESI_SAYISI, 'Yonlendirici': YONLENDIRICI_SAYISI,
+            'FeromonIstasyonu': FEROMON_ISTASYONU_SAYISI,
+            'OforiGazi': OFORI_GAZI_SAYISI,
+            'KorkuGazi': KORKU_GAZI_SAYISI,
+            'DonmaAlani': DONMA_ALANI_SAYISI,
+            'DepresifAlan': DEPRESIF_ALAN_SAYISI,
+            'SosyalAyna': SOSYAL_AYNA_SAYISI,
+            'EngelYansitici': ENGEL_YANSITICI_SAYISI,
+            'SesYayici': SES_YAYICI_SAYISI,
+            'GolgeRehber': GOLGE_REHBER_SAYISI,
+            'KaosCekirdegi': KAOS_CEKIRDEGI_SAYISI,
+        }
         arac_kullanim = {ad: 0 for ad in arac_adlari}
         arac_secimi = 0
+        arac_paneli = AracPaneli(arac_adlari, mevcut_arac_sayisi=len(arac_listesi))
 
         for kat in range(harita_yon.max_katman):
             for y in range(HARITA_YUKSEKLIK_PARSEL):
@@ -403,6 +503,8 @@ def main():
                             arac_kullanim[arac_adlari[tur]] += 1
 
         def oyunda_arac_yerlestir():
+            if arac_secimi < 0 or arac_secimi >= len(arac_listesi):
+                return
             mx, my = pygame.mouse.get_pos()
             grid_x = mx // PARSEK_BOYUTU
             grid_y = my // PARSEK_BOYUTU
@@ -472,35 +574,64 @@ def main():
 
                     if ses_menusu.tus_isle(event):
                         continue
-                    if event.key == pygame.K_F2:
-                        ajan_izleyici.ac_kapat()
+                    if ajan_izleyici.tus_isle(event):
+                        continue
+                    if event.key == pygame.K_m:
+                        yeni_mod = suru_yon.oyun_modu_degistir(1)
+                        log_yon.olaylari_yaz([
+                            {
+                                "tip": "mod_degisim",
+                                "tick": suru_yon.toplam_tick,
+                                "mod": yeni_mod,
+                                "kaynak": "M",
+                            }
+                        ])
+                        continue
+                    if event.key == pygame.K_F3:
+                        if suru_yon.oyun_modu_ayarla("normal"):
+                            log_yon.olaylari_yaz([{"tip": "mod_degisim", "tick": suru_yon.toplam_tick, "mod": "normal", "kaynak": "F3"}])
+                        continue
+                    if event.key == pygame.K_F4:
+                        if suru_yon.oyun_modu_ayarla("kesif"):
+                            log_yon.olaylari_yaz([{"tip": "mod_degisim", "tick": suru_yon.toplam_tick, "mod": "kesif", "kaynak": "F4"}])
+                        continue
+                    if event.key == pygame.K_F5:
+                        if suru_yon.oyun_modu_ayarla("gezinti"):
+                            log_yon.olaylari_yaz([{"tip": "mod_degisim", "tick": suru_yon.toplam_tick, "mod": "gezinti", "kaynak": "F5"}])
+                        continue
+                    if event.key == pygame.K_F6:
+                        if suru_yon.oyun_modu_ayarla("yol_izleme"):
+                            log_yon.olaylari_yaz([{"tip": "mod_degisim", "tick": suru_yon.toplam_tick, "mod": "yol_izleme", "kaynak": "F6"}])
                         continue
                     if event.key == pygame.K_UP:
                         harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman + 1)
                     elif event.key == pygame.K_DOWN:
                         harita_yon.aktif_katmani_degistir(harita_yon.aktif_katman - 1)
-                    elif event.key == pygame.K_1:
-                        arac_secimi = 0
-                    elif event.key == pygame.K_2:
-                        arac_secimi = 1
-                    elif event.key == pygame.K_3:
-                        arac_secimi = 2
-                    elif event.key == pygame.K_4:
-                        arac_secimi = 3
-                    elif event.key == pygame.K_5:
-                        arac_secimi = 4
-                    elif event.key == pygame.K_6:
-                        arac_secimi = 5
-                    elif event.key == pygame.K_7:
-                        arac_secimi = 6
-                    elif event.key == pygame.K_8:
-                        arac_secimi = 7
-                    elif event.key == pygame.K_9:
-                        arac_secimi = 8
-                    elif event.key == pygame.K_0:
-                        arac_secimi = 9
+                    elif arac_paneli.klavye_secimi(event):
+                        arac_secimi = arac_paneli.secili_index
                 elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if ajan_izleyici.tus_isle(event):
+                        continue
+                    if arac_paneli.mouse_secimi(event):
+                        arac_secimi = arac_paneli.secili_index
+                        continue
                     if event.button == 1:
+                        mod_degisti = False
+                        for dugme in mod_dugmeleri_uret(suru_yon):
+                            if dugme["rect"].collidepoint(event.pos):
+                                if suru_yon.oyun_modu_ayarla(dugme["mod"]):
+                                    log_yon.olaylari_yaz([
+                                        {
+                                            "tip": "mod_degisim",
+                                            "tick": suru_yon.toplam_tick,
+                                            "mod": dugme["mod"],
+                                            "kaynak": "harita_dugme",
+                                        }
+                                    ])
+                                mod_degisti = True
+                                break
+                        if mod_degisti:
+                            continue
                         oyunda_arac_yerlestir()
                         if ses_menusu.efekt_aktif() and ses_arac_yerlestir:
                             ses_arac_yerlestir.play()
@@ -513,47 +644,50 @@ def main():
             harita_yon.arac_etkilerini_uygula(suru_yon.ajanlar)
             suru_yon.guncelle()
             oyun_yon.guncelle()
-            ajan_izleyici.guncelle(suru_yon.ajanlar)
+            ajan_izleyici.guncelle(suru_yon.ajanlar, suru_yon)
 
             log_yon.olaylari_yaz(suru_yon.olum_olaylarini_al())
             kare_sayaci += 1
             if kare_sayaci % max(1, LOG_KARE_ARALIGI) == 0:
-                log_yon.anlik_durum_yaz(suru_yon.toplam_tick, suru_yon.ajanlar)
+                log_yon.anlik_durum_yaz(suru_yon.toplam_tick, suru_yon.ajanlar, suru_yon)
 
             if sid_manager.available:
                 sid_manager.update()
 
             harita_yon.render(ekran, oyun_fontu)
             suru_yon.render(ekran, oyun_fontu, harita_yon.aktif_katman)
-            if harita_yon.aktif_katman == harita_yon.giris_katman:
-                giris_px_x = harita_yon.giris_x * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
-                giris_px_y = harita_yon.giris_y * PARSEK_BOYUTU + PARSEK_BOYUTU // 2
-                pygame.draw.polygon(ekran, (255, 255, 255), [
-                    (giris_px_x - 10, giris_px_y),
-                    (giris_px_x + 10, giris_px_y - 10),
-                    (giris_px_x + 10, giris_px_y + 10)
-                ])
+            ciz_giris_cikis_isaretleri(ekran, harita_yon)
+            ciz_mod_dugmeleri(ekran, ui_fontu, suru_yon)
 
             oyunda_etki_alani_goster(ekran)
             oyun_yon.render(ekran, oyun_fontu)
+            arac_paneli.ciz(ekran, ui_fontu, arac_kullanim, arac_limitleri)
 
+            ajan_izleyici.ciz(ekran)
             arac_adi = arac_adlari[arac_secimi]
             secili_arac_etiketi_ciz(ekran, ui_fontu, arac_adi)
             if ses_menusu.acik:
                 ses_menusu.ciz(ekran, ui_fontu)
             else:
-                cubuk_y = HARITA_ALAN_YUKSEKLIK
+                cubuk_y = HARITA_ALAN_YUKSEKLIK + ARAC_PANEL_YUKSEKLIK
                 pygame.draw.rect(ekran, KOYU_GRI, pygame.Rect(0, cubuk_y, EKRAN_GENISLIK, DURUM_CUBUGU_YUKSEKLIK))
                 pygame.draw.line(ekran, GRI, (0, cubuk_y), (EKRAN_GENISLIK, cubuk_y), 2)
+
+                toplam_ajan = max(1, oyun_yon.baslangic_nufusu)
+                cikis_sayisi = oyun_yon.dogru_cikis
+                basari_orani = (cikis_sayisi * 100.0) / toplam_ajan
+                kalan_sayi = len(suru_yon.ajanlar)
+
                 bilgi = (
-                    f"Katman: {harita_yon.aktif_katman + 1}/{harita_yon.max_katman} | "
+                    f"Katman: {harita_yon.aktif_katman + 1}/{harita_yon.max_katman} | Basari: {basari_orani:.0f}% ({cikis_sayisi}/{toplam_ajan}) | Suru: {kalan_sayi}/{toplam_ajan} | "
                     f"Araç: {arac_adi} ({arac_kullanim[arac_adi]}/{arac_limitleri[arac_adi]}) | "
-                    "Etki: 5x5x5 | 1-0 sec | Sol: yerlestir | Sag: kaldir | Yukari/Asagi: Katman | ESC: Oyun Menusu | F1: Ses | F2: Ajan Penceresi"
+                    f"Mod: {suru_yon.oyun_modu_etiket()} | "
+                    "Etki: 5x5x5 | Harita Ustu Dugmeler: Mod Degistir | 1-0 / Shift+1-0 sec | Sol: yerlestir | Sag: kaldir | Yukari/Asagi: Katman | M: Mod Siradaki | F3:F6 Mod Sec | ESC: Oyun Menusu | F1: Ses | F2 / `: Oyun Bilgi"
                 )
                 ekran.blit(ui_fontu.render(bilgi, True, (235, 235, 235)), (10, cubuk_y + 8))
                 # Faz 8 madde 3: araç mini satırı — tüm araçların kısayol/miktar özeti
-                _harf = '1234567890'
-                _kisa_adlar = ['Mnc', 'Ayn', 'Bar', 'Ats', 'CkO', 'ShY', 'Snd', 'GCk', 'KMk', 'Ynl']
+                _harf = '1234567890' * 2
+                _kisa_adlar = ['Mnc', 'Ayn', 'Bar', 'Ats', 'CkO', 'ShY', 'Snd', 'GCk', 'KMk', 'Ynl', 'Frm', 'Efg', 'Krg', 'Dnm', 'Dpr', 'SyA', 'EyN', 'SsY', 'GlR', 'KsC']
                 mini_parcalar = [
                     f"[{_harf[i]}]{_kisa_adlar[i]}:{arac_kullanim.get(arac_adlari[i],0)}/{arac_limitleri.get(arac_adlari[i],0)}"
                     for i in range(len(arac_adlari))

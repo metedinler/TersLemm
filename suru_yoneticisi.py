@@ -5,6 +5,11 @@ import json
 from datetime import datetime
 from ayarlar import *
 
+try:
+    import numpy as np
+except Exception:
+    np = None
+
 
 class KavramsalMotor:
     """Faz 3: Arazi/aletleri kavramsal etiketlere ceviren yorum katmani."""
@@ -30,6 +35,8 @@ class KavramsalMotor:
             'TAS_DUVAR': 'KULLANILAMAZ',
             'DIK_DAG': 'KULLANILAMAZ',
             'BARIYER': 'KULLANILAMAZ',
+            'ASANSOR_YUKARI': 'KULLANILABILIR',
+            'ASANSOR_ASAGI': 'KULLANILABILIR',
         }
         self.alet_etiketleri = {
             'CikisOku': 'KULLANILABILIR',
@@ -42,6 +49,16 @@ class KavramsalMotor:
             'Ayna': 'CIRKIN',
             'Yonlendirici': 'CIRKIN',
             'Bariyer': 'KULLANILAMAZ',
+            'FeromonIstasyonu': 'KULLANILABILIR',
+            'OforiGazi': 'CIRKIN',
+            'KorkuGazi': 'KOTU',
+            'DonmaAlani': 'KOTU',
+            'DepresifAlan': 'KOTU',
+            'SosyalAyna': 'CIRKIN',
+            'EngelYansitici': 'CIRKIN',
+            'SesYayici': 'CIRKIN',
+            'GolgeRehber': 'IYI', # GolgeRehber'in etkisi genellikle olumlu, çünkü sahte lideri ayıklamaya yardımcı olur2722
+            'KaosCekirdegi': 'KOTU',
         }
         self.nesne_davranislari = {
             'YOL': {'onerilen_tepki': 'TAKIP_ET', 'amac': 'hedefe_ilerle', 'ilgili_beceri': 'engelden_kacma'},
@@ -49,6 +66,8 @@ class KavramsalMotor:
             'CIKIS_KAPI': {'onerilen_tepki': 'ULAS', 'amac': 'kurtulusu_tamamla', 'ilgili_beceri': 'engelden_kacma'},
             'MERDIVEN_YUKARI': {'onerilen_tepki': 'KULLAN', 'amac': 'katman_degistir', 'ilgili_beceri': 'tirmanma'},
             'MERDIVEN_ASAGI': {'onerilen_tepki': 'KULLAN', 'amac': 'katman_degistir', 'ilgili_beceri': 'tirmanma'},
+            'ASANSOR_YUKARI': {'onerilen_tepki': 'KULLAN', 'amac': 'katman_degistir_hizli', 'ilgili_beceri': 'tirmanma'},
+            'ASANSOR_ASAGI': {'onerilen_tepki': 'KULLAN', 'amac': 'katman_degistir_hizli', 'ilgili_beceri': 'tirmanma'},
             'SU_GOL': {'onerilen_tepki': 'TEMKINLI_GEC', 'amac': 'bogulmadan_gec', 'ilgili_beceri': 'yuzme'},
             'DENIZ': {'onerilen_tepki': 'UZAK_DUR', 'amac': 'olumcul_sudan_kacin', 'ilgili_beceri': 'yuzme'},
             'SIKI_ORMAN': {'onerilen_tepki': 'YAVASLA', 'amac': 'guvenli_ilerle', 'ilgili_beceri': 'direnc'},
@@ -64,6 +83,16 @@ class KavramsalMotor:
             'SendeletmeTasi': {'onerilen_tepki': 'DENGEYI_KORU', 'amac': 'sendelemeden_gec', 'ilgili_beceri': 'direnc'},
             'Ayna': {'onerilen_tepki': 'YONUNE_SUPHEYLE_BAK', 'amac': 'yon_tuzagini_coz', 'ilgili_beceri': 'tuzak_fark_etme'},
             'Yonlendirici': {'onerilen_tepki': 'ISARETI_TEST_ET', 'amac': 'yonlendirmeyi_dogrula', 'ilgili_beceri': 'tuzak_fark_etme'},
+            'FeromonIstasyonu': {'onerilen_tepki': 'TOPLAN', 'amac': 'grup_bagini_artir', 'ilgili_beceri': 'direnc'},
+            'OforiGazi': {'onerilen_tepki': 'HEDEFE_YUKLEN', 'amac': 'riskli_hizlanma', 'ilgili_beceri': 'engelden_kacma'},
+            'KorkuGazi': {'onerilen_tepki': 'KACIN', 'amac': 'tehlikeden_uzaklas', 'ilgili_beceri': 'direnc'},
+            'DonmaAlani': {'onerilen_tepki': 'DURAKLA', 'amac': 'sok_tepkisi', 'ilgili_beceri': 'direnc'},
+            'DepresifAlan': {'onerilen_tepki': 'MOTIVASYON_TOPLA', 'amac': 'moral_koru', 'ilgili_beceri': 'direnc'},
+            'SosyalAyna': {'onerilen_tepki': 'KONTROL_ET', 'amac': 'sosyal_algiyi_sorgula', 'ilgili_beceri': 'tuzak_fark_etme'},
+            'EngelYansitici': {'onerilen_tepki': 'DOLAN', 'amac': 'yansiyan_engeli_as', 'ilgili_beceri': 'engelden_kacma'},
+            'SesYayici': {'onerilen_tepki': 'DINLE_VE_KARAR_VER', 'amac': 'ses_tuzagini_coz', 'ilgili_beceri': 'tuzak_fark_etme'},
+            'GolgeRehber': {'onerilen_tepki': 'LIDERI_DOGRULA', 'amac': 'sahte_lideri_ayikla', 'ilgili_beceri': 'tuzak_fark_etme'},
+            'KaosCekirdegi': {'onerilen_tepki': 'TEMKINLI_GEC', 'amac': 'beyinsel_kararliligi_koru', 'ilgili_beceri': 'direnc'},
         }
 
     def parsel_etiketi(self, parsel):
@@ -75,7 +104,7 @@ class KavramsalMotor:
                 'nesne': 'BOSLUK',
                 'kaynak': 'bilinmiyor',
                 'etiket': 'KULLANILAMAZ',
-                'onerilen_tepki': 'GERI_DON',
+                'onerilen_tepki': 'TEMKINLI_GEC', # onceki deger geri_don du , bilinmeyen bolyeye girdiginde geri donmek yerine harekete devam ama temkinli gecmesi bildirildi
                 'amac': 'gecilemez_bolgeden_kacin',
                 'ilgili_beceri': 'engelden_kacma',
             }
@@ -106,6 +135,8 @@ class KavramsalMotor:
         }
 
     def baskin_nesne_profili(self, harita_yon, x, y, z, yaricap=2):
+        # Yakin cevredeki hucreleri tek tek skorlayip o anki karar icin en baskin nesneyi seciyoruz.
+        # Bu secim, salt mesafe degil etiket agirligi + alet olmasi gibi anlamsal degerleri de icerir.
         en_iyi = None
         en_iyi_skor = float('-inf')
         etiket_agirlik = {
@@ -184,6 +215,8 @@ class BiyolojikSistem:
         self.hormonlar['husran'] = max(0.0, self.hormonlar['husran'] - 0.1)
 
     def duygulara_yansit(self, duygular):
+        # Hormonlar bir hedef-duygu profili uretir; duygular bu hedefe tek karede ziplamaz,
+        # kontrollu bir yaklasma ile (homeostasis) akar. Bu sayede 100'e saplanma azaltilir.
         hedef_korku = max(0.0, min(100.0, self.hormonlar['adrenalin'] * 0.55 + self.hormonlar['kortizol'] * 0.30 - self.hormonlar['endorfin'] * 0.12))
         hedef_suphe = max(0.0, min(100.0, self.hormonlar['husran'] * 0.52 + self.hormonlar['kortizol'] * 0.28 - self.hormonlar['oksitosin'] * 0.10))
         hedef_merak = max(0.0, min(100.0, self.hormonlar['dopamin'] * 0.40 + self.hormonlar['serotonin'] * 0.22 - self.hormonlar['kortizol'] * 0.08 - self.hormonlar['husran'] * 0.05))
@@ -218,6 +251,91 @@ class BiyolojikSistem:
         }
 
 
+class SinirAgi:
+    """Hafif MLP: 11 girdi -> 5 gizli -> 3 cikti (hiz, yon, kopma)."""
+
+    def __init__(self, girdi_sayisi=11, gizli_sayisi=5, cikti_sayisi=3):
+        self.girdi_sayisi = girdi_sayisi
+        self.gizli_sayisi = gizli_sayisi
+        self.cikti_sayisi = cikti_sayisi
+
+        if np is not None:
+            self.w1 = np.random.uniform(-0.1, 0.1, (girdi_sayisi, gizli_sayisi))
+            self.w2 = np.random.uniform(-0.1, 0.1, (gizli_sayisi, cikti_sayisi))
+        else:
+            self.w1 = [[random.uniform(-0.1, 0.1) for _ in range(gizli_sayisi)] for _ in range(girdi_sayisi)]
+            self.w2 = [[random.uniform(-0.1, 0.1) for _ in range(cikti_sayisi)] for _ in range(gizli_sayisi)]
+
+    @staticmethod
+    def _sigmoid(x):
+        if x > 20:
+            return 1.0
+        if x < -20:
+            return 0.0
+        return 1.0 / (1.0 + pow(2.718281828, -x))
+
+    def dusun(self, girdiler):
+        if np is not None:
+            x = np.array(girdiler, dtype=float)
+            h = 1.0 / (1.0 + np.exp(-np.dot(x, self.w1)))
+            y = 1.0 / (1.0 + np.exp(-np.dot(h, self.w2)))
+            hiz = float(y[0])
+            yon = float(y[1])
+            kopma = float(y[2])
+        else:
+            gizli = []
+            for j in range(self.gizli_sayisi):
+                toplam = 0.0
+                for i in range(self.girdi_sayisi):
+                    toplam += float(girdiler[i]) * float(self.w1[i][j])
+                gizli.append(self._sigmoid(toplam))
+
+            ciktilar = []
+            for j in range(self.cikti_sayisi):
+                toplam = 0.0
+                for i in range(self.gizli_sayisi):
+                    toplam += float(gizli[i]) * float(self.w2[i][j])
+                ciktilar.append(self._sigmoid(toplam))
+            hiz, yon, kopma = ciktilar
+
+        return {
+            'hiz_carpani': 0.75 + hiz * 0.65,
+            'yon_sapma': (yon - 0.5) * 2.0,
+            'kopma_bias': (kopma - 0.5) * 0.22,
+        }
+
+
+class UstAkilSinirSistemi:
+    """Global suru durumu uzerinden liderlere modulasyon veren ust katman."""
+
+    def __init__(self):
+        self.son_mod = 'DENGE'
+        self.son_karar = {'hiz_mod': 1.0, 'kopma_mod': 0.0, 'kesif_mod': 0.0}
+
+    def karar_uret(self, ajanlar, liderler, tick):
+        if not ajanlar:
+            self.son_mod = 'DENGE'
+            self.son_karar = {'hiz_mod': 1.0, 'kopma_mod': 0.0, 'kesif_mod': 0.0}
+            return self.son_karar
+
+        ort_korku = sum(a.duygular.get('korku', 0.0) for a in ajanlar) / max(1, len(ajanlar))
+        ort_merak = sum(a.duygular.get('merak', 0.0) for a in ajanlar) / max(1, len(ajanlar))
+        lider_orani = len(liderler) / max(1.0, len(ajanlar))
+
+        if ort_korku > 58:
+            self.son_mod = 'SAVUNMA'
+            self.son_karar = {'hiz_mod': 0.92, 'kopma_mod': 0.05, 'kesif_mod': -0.08}
+        elif ort_merak > 44 and lider_orani < 0.09:
+            self.son_mod = 'KESIF'
+            self.son_karar = {'hiz_mod': 1.08, 'kopma_mod': -0.03, 'kesif_mod': 0.12}
+        else:
+            self.son_mod = 'DENGE'
+            dalga = ((tick % 120) / 120.0) - 0.5
+            self.son_karar = {'hiz_mod': 1.0 + dalga * 0.03, 'kopma_mod': 0.0, 'kesif_mod': 0.0}
+
+        return self.son_karar
+
+
 class EvrimselHafiza:
     """Faz 7 başlangıcı: dosya tabanlı genom/ajan arşivi."""
 
@@ -238,7 +356,7 @@ class EvrimselHafiza:
             'IYI': 'ULAS',
             'KOTU': 'KACIN',
             'CIRKIN': 'KONTROL_ET',
-            'KULLANILAMAZ': 'GERI_DON',
+            'KULLANILAMAZ': 'TEMKINLI_GEC', #onceki geri don du
             'KULLANILABILIR': 'INCELE',
         }.get(etiket, 'INCELE')
         amac = {
@@ -259,6 +377,8 @@ class EvrimselHafiza:
         }
 
     def migrate_arsiv_semantik_schema(self, force=False):
+        # Eski arsivlerdeki koordinat-merkezli semantik kayitlari nesne-merkezli yeni semaya cevirir.
+        # Bu sayede eski egitimli veri kaybedilmeden yeni karar katmanina tasinmis olur.
         if (not force) and os.path.exists(self.migrasyon_durumu_yolu):
             return 0
 
@@ -441,6 +561,14 @@ class SuruAjani:
             "merak": 0.0,
             "suphe": 0.0
         }
+        # Durumsal karar matrisi icin bireysel karakter profili.
+        self.mizac = {
+            "cesaret": random.uniform(0.3, 1.0),
+            "sadakat": random.uniform(0.5, 1.0),
+            "zeka": random.uniform(0.1, 0.8),
+        }
+        self.durum_modu = "NORMAL"  # NORMAL, KESIF, PANIK, SAVUNMA, ITAAT
+        self.kopma_egilimi = 0.0
         
         # 5. UYKUDAKİ BECERİLER (Senin harika tasarımın)
         # 0: Hiç bilmiyor, 10: Usta (Efor harcamaz)
@@ -459,17 +587,93 @@ class SuruAjani:
         self.kavramsal_durum = 'KULLANILABILIR'
         self.kopma_islendi = False
         self.biyolojik_sistem = BiyolojikSistem()
+        self.beyin = SinirAgi(girdi_sayisi=11, gizli_sayisi=5, cikti_sayisi=3)
+        self.nn_karar = {'hiz_carpani': 1.0, 'yon_sapma': 0.0, 'kopma_bias': 0.0}
         self.mod = 'DENGELI'
         self.semantik_iz = []
         self.aktarilabilir_semantik_hafiza = []
         self.gazi_puani = 0.0
         self.gazi_mi = False
         self.gazi_omur = 0
+        self.amigdala_aktif = False
         self.hareket_birikimi = random.uniform(0.45, 1.1)
         self.nesne_tercihleri = {}
         self.alt_grup_egilimi = 0.0
+        self.son_konumlar = [(x, y, self.z)]
+        self.son_tehlike_ogrenme_tick = -999999
+
+    def _sinir_girdilerini_olustur(self, cevre_ozeti, zincir_orani=0.0):
+        h = self.biyolojik_sistem.hormonlar
+        return [
+            self.duygular.get('korku', 0.0) / 100.0,
+            self.duygular.get('merak', 0.0) / 100.0,
+            self.duygular.get('suphe', 0.0) / 100.0,
+            h.get('adrenalin', 0.0) / 100.0,
+            h.get('kortizol', 0.0) / 100.0,
+            h.get('dopamin', 0.0) / 100.0,
+            h.get('serotonin', 0.0) / 100.0,
+            h.get('oksitosin', 0.0) / 100.0,
+            h.get('husran', 0.0) / 100.0,
+            self.mizac.get('cesaret', 0.5),
+            max(0.0, min(1.0, zincir_orani + cevre_ozeti.get('KOTU', 0) / 40.0)),
+        ]
+
+    def sinir_karari(self, cevre_ozeti, zincir_orani=0.0):
+        girdiler = self._sinir_girdilerini_olustur(cevre_ozeti, zincir_orani=zincir_orani)
+        self.nn_karar = self.beyin.dusun(girdiler)
+        return self.nn_karar
+
+    def durum_matrisi_karari(self, cevre_ozeti):
+        """Duygu+hormon+mizac girdilerinden durumsal mod uretir."""
+        korku = self.duygular.get("korku", 0.0)
+        merak = self.duygular.get("merak", 0.0)
+        suphe = self.duygular.get("suphe", 0.0)
+
+        adrenalin = self.biyolojik_sistem.hormonlar.get("adrenalin", 0.0)
+        kortizol = self.biyolojik_sistem.hormonlar.get("kortizol", 0.0)
+        dopamin = self.biyolojik_sistem.hormonlar.get("dopamin", 0.0)
+        oksitosin = self.biyolojik_sistem.hormonlar.get("oksitosin", 0.0)
+
+        kotu = cevre_ozeti.get("KOTU", 0)
+        kullan = cevre_ozeti.get("KULLANILABILIR", 0)
+
+        cesaret = self.mizac.get("cesaret", 0.5)
+        sadakat = self.mizac.get("sadakat", 0.7)
+        zeka = self.mizac.get("zeka", 0.5)
+
+        panik_skoru = korku * 0.75 + adrenalin * 0.55 + kortizol * 0.35 + kotu * 4.5 - cesaret * 18
+        kesif_skoru = merak * 0.62 + dopamin * 0.48 + zeka * 24 + kullan * 1.8 - suphe * 0.25
+        itaat_skoru = sadakat * 70 + oksitosin * 0.3 - korku * 0.2
+        savunma_skoru = suphe * 0.8 + kortizol * 0.35 + kotu * 2.5 - zeka * 8
+
+        if panik_skoru > max(kesif_skoru, itaat_skoru, savunma_skoru) and panik_skoru > 55:
+            self.durum_modu = "PANIK"
+        elif kesif_skoru > max(itaat_skoru, savunma_skoru) and kesif_skoru > 45:
+            self.durum_modu = "KESIF"
+        elif savunma_skoru > itaat_skoru and savunma_skoru > 45:
+            self.durum_modu = "SAVUNMA"
+        elif itaat_skoru > 48:
+            self.durum_modu = "ITAAT"
+        else:
+            self.durum_modu = "NORMAL"
+
+        # Kopma egilimi: panikte artar, itaatte azalir.
+        kopma = 0.0
+        if self.durum_modu == "PANIK":
+            kopma += 0.12
+        if self.durum_modu == "KESIF":
+            kopma += 0.03
+        if self.durum_modu == "ITAAT":
+            kopma -= 0.10
+        kopma += max(0.0, korku - 72) / 480.0
+        kopma += max(0.0, suphe - 76) / 460.0
+        kopma -= sadakat * 0.08
+
+        self.kopma_egilimi = max(0.0, min(0.38, kopma + self.nn_karar.get('kopma_bias', 0.0) * 0.7))
 
     def baslangic_mizaci_ata(self, lider_mi=False):
+        # Her ajan ayni duygu/ozelliklerle dogmasin diye baslangic mizaci dagitiyoruz.
+        # Liderlerin merak ve uzmanlasma araligi biraz daha yuksek tutuluyor.
         merak_taban = 14.0 if lider_mi else 6.0
         merak_tavan = 34.0 if lider_mi else 24.0
         self.duygular['merak'] = round(random.uniform(merak_taban, merak_tavan), 2)
@@ -538,6 +742,8 @@ class SuruAjani:
         self.hiz = self.temel_hiz
 
     def hareket_hakki_var_mi(self, harita_yon):
+        # Ajan her karede zorunlu adim atmaz; hareket birikimi zemin ve hiza gore dolar.
+        # Boylesi, agir zeminde yavaslama etkisini karar dongusunu bozmadan hissettirir.
         katsayi = self._zemin_hareket_katsayisi(harita_yon)
         gazi_bonus = 0.12 if self.gazi_mi else 0.0
         artis = max(0.35, (self.hiz * 1.35 + gazi_bonus) / max(0.45, katsayi))
@@ -604,8 +810,14 @@ class SuruAjani:
             return False
 
         if hedef_z > mevcut_z:
-            return mevcut_parsel.doku_id == 'MERDIVEN_YUKARI' and hedef_parsel.doku_id == 'MERDIVEN_ASAGI'
-        return mevcut_parsel.doku_id == 'MERDIVEN_ASAGI' and hedef_parsel.doku_id == 'MERDIVEN_YUKARI'
+            return (
+                (mevcut_parsel.doku_id == 'MERDIVEN_YUKARI' and hedef_parsel.doku_id == 'MERDIVEN_ASAGI')
+                or (mevcut_parsel.doku_id == 'ASANSOR_YUKARI' and hedef_parsel.doku_id == 'ASANSOR_ASAGI')
+            )
+        return (
+            (mevcut_parsel.doku_id == 'MERDIVEN_ASAGI' and hedef_parsel.doku_id == 'MERDIVEN_YUKARI')
+            or (mevcut_parsel.doku_id == 'ASANSOR_ASAGI' and hedef_parsel.doku_id == 'ASANSOR_YUKARI')
+        )
     
     def yol_bul(self, harita_yon):
         """Omurga rotadan yararlanarak giristen cikisa yol olusturur. Omurga yoksa A* fallback."""
@@ -746,10 +958,22 @@ class SuruAjani:
             hedef.beceri_ogren(beceri_adi, aktarim)
             aktarim *= 0.7
             hedef = hedef.arkamdaki_ajan
+
+    def olumsuz_deneyim_uygula(self, nesne_adi, ilgili_beceri, siddet):
+        """Can acitan veya siddetli korku yaratan nesnelerde tercih azalir, ilgili beceri ogrenilir."""
+        if nesne_adi:
+            mevcut = float(self.nesne_tercihleri.get(nesne_adi, 0.0))
+            ceza = max(0.18, min(2.4, siddet * 0.35))
+            self.nesne_tercihleri[nesne_adi] = max(-3.0, mevcut - ceza)
+        if ilgili_beceri in self.beceriler:
+            ogrenme = max(0.05, min(0.70, siddet * 0.12))
+            self.beceriler[ilgili_beceri] = min(10.0, self.beceriler[ilgili_beceri] + ogrenme)
+        self.duygular["suphe"] = min(100.0, self.duygular.get("suphe", 0.0) + siddet * 1.4)
+        self.duygular["merak"] = max(0.0, self.duygular.get("merak", 0.0) - siddet * 0.4)
     
     # --- AKSİYON METOTLARI (Geniş metot, parametre kısıtlaması) ---
 
-    def suya_gir(self, zemin_zorlugu):
+    def suya_gir(self, zemin_zorlugu, nesne_adi='SU_GOL'):
         """Zemin nesnesi 'Su/Göl' olduğunda bu devasa metot çağrılır."""
         
         # Beceri 0 ise yorulma maksimumdur, beceri 10 ise yorulma sıfıra yakındır.
@@ -759,6 +983,7 @@ class SuruAjani:
         if harcanan_efor > 0:
             self.can -= harcanan_efor
             self.duygular["korku"] += harcanan_efor * 2 # Canı yandıkça korkar
+            self.olumsuz_deneyim_uygula(nesne_adi, "yuzme", harcanan_efor)
             
         if self.can <= 0:
             self.ol()
@@ -787,7 +1012,7 @@ class SuruAjani:
                 zemin_zorlugu = 3.0  # Orta derin
             else:
                 zemin_zorlugu = 1.0  # Az derin
-            self.suya_gir(zemin_zorlugu)
+            self.suya_gir(zemin_zorlugu, parsel.doku_id)
             return
         elif parsel.doku_id in ['DAG', 'DIK_DAG']:
             zemin_zorlugu = 1.5  # Yavaşlatır
@@ -800,6 +1025,8 @@ class SuruAjani:
             if harcanan_efor > 0:
                 self.can -= harcanan_efor
                 self.duygular["korku"] += harcanan_efor * 2
+                ilgili_beceri = "tirmanma" if parsel.doku_id in ['DAG', 'DIK_DAG', 'PLATO'] else "direnc"
+                self.olumsuz_deneyim_uygula(parsel.doku_id, ilgili_beceri, harcanan_efor)
                 if self.can <= 0:
                     self.ol()
                 elif self.lider_mi and harcanan_efor > 1:
@@ -820,6 +1047,7 @@ class SuruYoneticisi:
         self.harita = harita_yoneticisi
         self.kavramsal_motor = KavramsalMotor()
         self.evrimsel_hafiza = EvrimselHafiza()
+        self.ust_akil = UstAkilSinirSistemi()
         self.arac_etkilesim_matrisi = {
             ('Ates', 'Bariyer'): {'korku': 6.0, 'suphe': 4.0, 'kortizol': 4.0},
             ('Ates', 'SahteYol'): {'korku': 5.0, 'suphe': 6.0, 'husran': 5.0},
@@ -838,6 +1066,9 @@ class SuruYoneticisi:
         self.toplam_tick = 0
         self._olum_olaylari = []
         self._son_arsiv_tick = 0
+        self.oyun_modlari = ["normal", "kesif", "gezinti", "yol_izleme"]
+        self.oyun_modu = "normal"
+        self._mod_degisim_tick = 0
 
     def kayit_olum_olayi(self, ajan, neden="bilinmiyor"):
         self._olum_olaylari.append({
@@ -857,15 +1088,134 @@ class SuruYoneticisi:
         olaylar = self._olum_olaylari[:]
         self._olum_olaylari.clear()
         return olaylar
+
+    def oyun_modu_ayarla(self, yeni_mod):
+        mod = str(yeni_mod).strip().lower()
+        if mod not in self.oyun_modlari:
+            return False
+        self.oyun_modu = mod
+        self._mod_degisim_tick = self.toplam_tick
+        return True
+
+    def oyun_modu_degistir(self, ileri=1):
+        idx = self.oyun_modlari.index(self.oyun_modu)
+        idx = (idx + int(ileri)) % len(self.oyun_modlari)
+        self.oyun_modu = self.oyun_modlari[idx]
+        self._mod_degisim_tick = self.toplam_tick
+        return self.oyun_modu
+
+    def oyun_modu_etiket(self):
+        etiketler = {
+            "normal": "NORMAL OYUN",
+            "kesif": "KESIF MODU",
+            "gezinti": "GEZINTI MODU",
+            "yol_izleme": "YOL IZLEME MODU",
+        }
+        return etiketler.get(self.oyun_modu, self.oyun_modu.upper())
+
+    def _rol_duygu_direnci_uygula(self, ajan):
+        """Lider/gazi rollerinde korku-suphe daha yavas degissin, merak omurgasi korunsun."""
+        korku = ajan.duygular.get('korku', 0.0)
+        suphe = ajan.duygular.get('suphe', 0.0)
+        merak = ajan.duygular.get('merak', 0.0)
+
+        if ajan.gazi_mi:
+            korku = min(78.0, korku)
+            suphe = min(62.0, suphe)
+            merak = min(100.0, merak + 0.18)
+        if ajan.lider_mi:
+            korku = min(86.0, korku)
+            suphe = min(72.0, suphe)
+            merak = min(100.0, merak + 0.10)
+
+        ajan.duygular['korku'] = max(0.0, korku)
+        ajan.duygular['suphe'] = max(0.0, suphe)
+        ajan.duygular['merak'] = max(0.0, merak)
+
+    def _rastgele_baslangic_noktasi(self):
+        """Suru, giris katmaninda yoldan bagimsiz bir noktadan dogar."""
+        z = self.harita.giris_katman
+        adaylar = []
+        yedekler = []
+        for y in range(HARITA_YUKSEKLIK_PARSEL):
+            for x in range(HARITA_GENISLIK_PARSEL):
+                p = self.harita.map_grid[z][y][x]
+                if not p or not p.yurunebilir or p.hasar_verir:
+                    continue
+                doku = getattr(p, 'doku_id', '')
+                if doku in ['SU_GOL', 'DENIZ', 'CIKIS_DOGRU', 'CIKIS_SAHTE']:
+                    continue
+                yedekler.append((x, y))
+                if doku not in ['YOL', 'GIRIS']:
+                    adaylar.append((x, y))
+        secimler = adaylar if adaylar else yedekler
+        if secimler:
+            return random.choice(secimler)
+        return self.harita.giris_x, self.harita.giris_y
+
+    def _hucre_dolulu_skoru(self, x, y, z, haric_id=None):
+        dolu = 0
+        for diger in self.ajanlar:
+            if not diger.hayatta:
+                continue
+            if haric_id is not None and diger.id == haric_id:
+                continue
+            if diger.x == x and diger.y == y and diger.z == z:
+                dolu += 1
+        return dolu
+
+    def _parsel_risk_skoru(self, parsel, profil):
+        if parsel is None:
+            return 20.0
+        risk = 0.0
+        if getattr(parsel, 'hasar_verir', False):
+            risk += 12.0
+        etiket = profil.get('etiket', 'KULLANILABILIR')
+        if etiket == 'KOTU':
+            risk += 8.0
+        elif etiket == 'CIRKIN':
+            risk += 4.0
+        elif etiket == 'KULLANILAMAZ':
+            risk += 16.0
+        doku = getattr(parsel, 'doku_id', '')
+        if doku == 'DENIZ':
+            risk += 8.0
+        elif doku == 'SU_GOL':
+            risk += 4.5
+        elif doku in ['DIK_DAG', 'DAG']:
+            risk += 2.5
+        return risk
+
+    def _korkudan_ogren(self, ajan):
+        if self.toplam_tick - getattr(ajan, 'son_tehlike_ogrenme_tick', -999999) < 24:
+            return
+        son = getattr(ajan, 'semantik_iz', [])[-1:] or []
+        if not son:
+            return
+        kayit = son[0]
+        if kayit.get('etiket') not in ['KOTU', 'CIRKIN']:
+            return
+        korku = ajan.duygular.get('korku', 0.0)
+        suphe = ajan.duygular.get('suphe', 0.0)
+        if korku < 58 and suphe < 54:
+            return
+        nesne = kayit.get('nesne')
+        ilgili_beceri = kayit.get('ilgili_beceri', 'direnc')
+        siddet = max(korku - 52.0, suphe - 48.0) / 18.0
+        ajan.olumsuz_deneyim_uygula(nesne, ilgili_beceri, max(0.18, min(1.6, siddet)))
+        ajan.son_tehlike_ogrenme_tick = self.toplam_tick
     
     def suru_yarat(self, baslangic_x, baslangic_y, boyut):
         """Bölüm başında sürüyü birbirine bağlı bir zincir olarak yaratır."""
+        baslangic_x, baslangic_y = self._rastgele_baslangic_noktasi()
         onceki_ajan = None
         
         for i in range(boyut):
             yeni_ajan = SuruAjani(baslangic_x, baslangic_y, i)
             # Faz 2: Tüm ajanlar haritanın gerçek giriş katmanında başlar.
             yeni_ajan.z = self.harita.giris_katman
+            if boyut >= 60 and i >= boyut // 2:
+                yeni_ajan.amigdala_aktif = True
             
             # İlk doğan ajan Liderdir
             if i == 0:
@@ -917,15 +1267,17 @@ class SuruYoneticisi:
             kopan_ajan.lider_mi = True
             kopan_ajan.kopma_islendi = True
             self.liderler.append(kopan_ajan)
-            # Faz 2: Yeni lider anında yol takibi moduna geçer (rol tabanlı davranış)
+            # Yeni lider: keşfe çıksın, yol lazım olursa lider_yapay_zeka içinde bulacak.
             kopan_ajan.yol = []
             kopan_ajan.yol_index = 0
-            kopan_ajan.yol_bul(self.harita)
+            kopan_ajan.duygular['merak'] = min(100.0, kopan_ajan.duygular.get('merak', 0.0) + 12.0)
         else:
             kopan_ajan.kopma_islendi = True
             kopan_ajan.duygular["korku"] += 80  # Lidersiz kaldılar, panik!
 
     def _kavramsal_basinci_duygulara_yansit(self, ajan):
+        # Bu katman, cevre algisini 3 asamada birlestirir:
+        # 1) Kavramsal etiket ozeti, 2) Hormonal tepki, 3) Son duygu guncellemesi.
         ozet = self.kavramsal_motor.cevre_ozeti(self.harita, ajan.x, ajan.y, ajan.z, yaricap=2)
         baskin_profil = self.kavramsal_motor.baskin_nesne_profili(self.harita, ajan.x, ajan.y, ajan.z, yaricap=2)
         yenilik = self._anlamsal_yenilik_katsayisi(ajan, baskin_profil)
@@ -950,6 +1302,8 @@ class SuruYoneticisi:
             ajan.kavramsal_durum = 'IYI'
         else:
             ajan.kavramsal_durum = baskin_profil['etiket']
+
+        self._rol_duygu_direnci_uygula(ajan)
 
         ajan.semantik_iz_kaydet(self.toplam_tick, baskin_profil)
 
@@ -1022,9 +1376,21 @@ class SuruYoneticisi:
         else:
             ajan.gazi_puani = max(0.0, ajan.gazi_puani - 0.08)
 
-        if (not ajan.gazi_mi) and ajan.gazi_puani >= 12.0:
+        katman_gecisi = 0
+        rota = getattr(ajan, 'son_konumlar', [])
+        for i in range(1, len(rota)):
+            if rota[i][2] != rota[i - 1][2]:
+                katman_gecisi += 1
+
+        gazi_olabilir = (
+            ajan.gazi_puani >= 28.0
+            and (katman_gecisi >= 2 or ajan.cikis_bilgisi >= 0.35)
+            and ajan.beceriler.get('direnc', 0.0) >= 0.35
+        )
+
+        if (not ajan.gazi_mi) and gazi_olabilir:
             ajan.gazi_mi = True
-            ajan.gazi_omur = 160
+            ajan.gazi_omur = 280
         elif ajan.gazi_mi:
             ajan.gazi_omur -= 1
             if ajan.gazi_omur <= 0:
@@ -1034,14 +1400,31 @@ class SuruYoneticisi:
         """Faz 6: Gazi ajan uygun koşulda liderliği devralabilir."""
         if ajan.lider_mi or not ajan.gazi_mi:
             return
+        if ajan.gazi_puani < 30.0:
+            return
+
         if len(self.liderler) >= self.maks_lider:
-            return
-        if ajan.gazi_puani < 16.0:
-            return
+            kritik_lider = None
+            for lider in self.liderler:
+                if not lider.hayatta:
+                    continue
+                if lider.duygular.get('korku', 0.0) > 92.0:
+                    kritik_lider = lider
+                    break
+            if kritik_lider is None:
+                return
+            kritik_lider.lider_mi = False
+            self.liderler = [l for l in self.liderler if l is not kritik_lider]
+
         self.zinciri_kopar(ajan)
 
     def _alt_grup_kesif_tetikle(self, ajan, oncu):
+        # Zincirdeki takipciler belirli merak/ozguven ve kisilik egilimi ile alt-grup kurup ayrisabilir.
+        # Bu mekanizma suru davranisini tek liderli ray sisteminden cikarip cokkollu kesfe acar.
         if ajan.lider_mi or not ajan.hayatta:
+            return False
+        grup_koruma_tik = globals().get("SURU_GRUP_KORUMA_TIK", SURU_GRUP_KORUMA_TIK_TEMEL)
+        if self.toplam_tick < grup_koruma_tik:
             return False
         if len(self.liderler) >= self.maks_lider:
             return False
@@ -1050,18 +1433,18 @@ class SuruYoneticisi:
 
         merak = ajan.duygular.get('merak', 0.0)
         ozguven = ajan.ozguven_puani()
-        egilim = getattr(ajan, 'alt_grup_egilimi', 0.0)
-        if merak < 32 and ozguven < 32 and egilim < 0.75:
+        egilim = getattr(ajan, 'alt_grup_egilimi', 0.0) 
+        if merak < 40 and ozguven < 40 and egilim < 0.88:
             return False
 
         profil = self.kavramsal_motor.baskin_nesne_profili(self.harita, ajan.x, ajan.y, ajan.z, yaricap=3)
-        tetik = 0.04 + egilim * 0.32 + max(0.0, merak - 35.0) * 0.002 + max(0.0, ozguven - 35.0) * 0.0012
+        tetik = 0.01 + egilim * 0.18 + max(0.0, merak - 45.0) * 0.0011 + max(0.0, ozguven - 45.0) * 0.0009
         if profil.get('etiket') in ['IYI', 'CIRKIN']:
-            tetik += 0.06
+            tetik += 0.03
         if profil.get('onerilen_tepki') in ['KULLAN', 'KONTROL_ET', 'YONU_IZLE', 'ISARETI_TEST_ET']:
-            tetik += 0.05
+            tetik += 0.02
 
-        if egilim > 0.90 and random.random() < 0.22:
+        if egilim > 0.95 and random.random() < 0.08:
             self.zinciri_kopar(ajan)
             if ajan.lider_mi:
                 ajan.duygular['suphe'] = max(0.0, ajan.duygular.get('suphe', 0.0) - 6.0)
@@ -1069,7 +1452,7 @@ class SuruYoneticisi:
                 return True
             return False
 
-        if random.random() >= min(0.70, tetik):
+        if random.random() >= min(0.28, tetik):
             return False
 
         self.zinciri_kopar(ajan)
@@ -1103,6 +1486,67 @@ class SuruYoneticisi:
                 aday.duygular['suphe'] = max(0.0, aday.duygular.get('suphe', 0.0) - 6.0)
                 gazi_ajan.gazi_puani = min(200.0, gazi_ajan.gazi_puani + 1.2)
 
+    def _duygu_bulastir(self):
+        """Oncudeki ajanin durumunu takipcilere yumusakca aktarir."""
+        for ajan in self.ajanlar:
+            oncu = ajan.onumdeki_ajan
+            if oncu is None or (not oncu.hayatta):
+                continue
+
+            # Toplamali bulasma yerine hedefe yakinlama kullanilir;
+            # bu sayede duygu gecisi hizli kalir ama sonsuz birikim yapmaz.
+            oncu_korku = oncu.duygular.get('korku', 0.0)
+            oncu_suphe = oncu.duygular.get('suphe', 0.0)
+            panik_carpan = 0.85 if oncu.durum_modu == "PANIK" else 0.58
+            korku_hedef = min(100.0, oncu_korku * panik_carpan)
+            suphe_hedef = min(100.0, oncu_suphe * (0.82 if oncu.durum_modu == "PANIK" else 0.55))
+
+            ajan.duygular['korku'] += (korku_hedef - ajan.duygular.get('korku', 0.0)) * 0.06
+            ajan.duygular['suphe'] += (suphe_hedef - ajan.duygular.get('suphe', 0.0)) * 0.055
+
+            if oncu.durum_modu == "ITAAT":
+                ajan.duygular['suphe'] = max(0.0, ajan.duygular.get('suphe', 0.0) - 0.6)
+                ajan.duygular['korku'] = max(0.0, ajan.duygular.get('korku', 0.0) - 0.4)
+
+            self._duygulari_sinirla(ajan)
+
+    def _duygulari_sinirla(self, ajan):
+        for ad in ['korku', 'suphe', 'merak']:
+            deger = float(ajan.duygular.get(ad, 0.0))
+            if deger != deger:  # NaN kontrolu
+                deger = 0.0
+            ajan.duygular[ad] = max(0.0, min(100.0, deger))
+
+    def _duygulari_sonumle_ve_dengele(self, ajan):
+        # Her uygulama adiminda yumusak dogal sonum uygulanir.
+        hormon = ajan.biyolojik_sistem.hormonlar
+        adrenalin = hormon.get('adrenalin', 0.0)
+        kortizol = hormon.get('kortizol', 0.0)
+        serotonin = hormon.get('serotonin', 0.0)
+        endorfin = hormon.get('endorfin', 0.0)
+
+        korku_azalis = 0.16 + serotonin * 0.003 + endorfin * 0.0025 - adrenalin * 0.0018 - kortizol * 0.0014
+        suphe_azalis = 0.12 + serotonin * 0.0024 - kortizol * 0.0012
+
+        if ajan.durum_modu == "PANIK":
+            korku_azalis *= 0.55
+            suphe_azalis *= 0.65
+
+        korku_azalis = max(0.02, korku_azalis)
+        suphe_azalis = max(0.015, suphe_azalis)
+
+        ajan.duygular['korku'] -= korku_azalis
+        ajan.duygular['suphe'] -= suphe_azalis
+
+        # Merak cok yukselirse yavasca normal banda geri gelir.
+        merak_hedef = 32.0
+        ajan.duygular['merak'] += (merak_hedef - ajan.duygular.get('merak', 0.0)) * 0.004
+
+        # Rol tabanli direncler sonrasi dengeyi tekrar uygula.
+        self._rol_duygu_direnci_uygula(ajan)
+
+        self._duygulari_sinirla(ajan)
+
     def guncelle(self):
         """Bu fonksiyon main.py içindeki oyun döngüsünde sürekli çağrılacak."""
         # Zorluk menüsü henüz çalışmadıysa modül içi dinamik sabitler tanımlı olmayabilir.
@@ -1112,6 +1556,7 @@ class SuruYoneticisi:
         cikis_bilgisi_artis = globals().get("CIKIS_BILGISI_ARTIS", CIKIS_BILGISI_ARTIS_TEMEL)
         ajan_karar_hz = globals().get("AJAN_KARAR_HZ", AJAN_KARAR_HZ_TEMEL)
         baslangic_bekleme_tik = globals().get("SURU_BASLANGIC_BEKLEME_TIK", SURU_BASLANGIC_BEKLEME_TIK_TEMEL)
+        duygu_sonum_tik_araligi = globals().get("DUYGU_SONUM_TIK_ARALIGI", DUYGU_SONUM_TIK_ARALIGI_TEMEL)
 
         self.toplam_tick += 1
         self.baslangic_bekleme += 1
@@ -1134,6 +1579,11 @@ class SuruYoneticisi:
         # Ölü ajanları kaldır
         self.ajanlar = [ajan for ajan in self.ajanlar if ajan.hayatta]
         self.liderler = [lider for lider in self.liderler if lider.hayatta]
+
+        # Duygular aralikli sonumlenir; anlik korku/suphe hemen sifira inmez.
+        if self.toplam_tick % max(1, int(duygu_sonum_tik_araligi)) == 0:
+            for ajan in self.ajanlar:
+                self._duygulari_sonumle_ve_dengele(ajan)
         
         # Öğrenme: Sürünün bilgisi daha yavaş artsın.
         if self.ogrenme_sayaci >= ogrenme_tik_araligi:
@@ -1151,6 +1601,7 @@ class SuruYoneticisi:
         karar_araligi = max(1, FPS // max(1, ajan_karar_hz))
         if self.tick_sayaci >= karar_araligi:
             self.tick_sayaci = 0
+            ust_akil_karari = self.ust_akil.karar_uret(self.ajanlar, self.liderler, self.toplam_tick)
             
             # 1. Aşama: Tüm ajanların mevcut konumunu hafızaya al
             for ajan in self.ajanlar:
@@ -1158,11 +1609,23 @@ class SuruYoneticisi:
                 ajan.eski_x = ajan.x
                 ajan.eski_y = ajan.y
                 ajan.eski_z = ajan.z
+                self._rol_duygu_direnci_uygula(ajan)
+
+            # Karar oncesi sosyal bulasma: zincirde duygular yayilir.
+            self._duygu_bulastir()
 
             # 2. Aşama: Liderler karar verir ve hareket eder
+            # Lider adimlari her zaman ayni degildir: hormon, kavramsal baski ve arac etkisi birlikte calisir.
             for lider in self.liderler:
                 self._kavramsal_basinci_duygulara_yansit(lider)
+                lider_ozet = self.kavramsal_motor.cevre_ozeti(self.harita, lider.x, lider.y, lider.z, yaricap=2)
+                lider.sinir_karari(lider_ozet, zincir_orani=0.0)
+                lider.nn_karar['hiz_carpani'] = max(0.7, min(1.6, lider.nn_karar.get('hiz_carpani', 1.0) * ust_akil_karari.get('hiz_mod', 1.0)))
+                lider.nn_karar['kopma_bias'] = max(-0.18, min(0.18, lider.nn_karar.get('kopma_bias', 0.0) + ust_akil_karari.get('kopma_mod', 0.0)))
+                lider.nn_karar['yon_sapma'] = max(-1.0, min(1.0, lider.nn_karar.get('yon_sapma', 0.0) + ust_akil_karari.get('kesif_mod', 0.0)))
+                lider.durum_matrisi_karari(lider_ozet)
                 self._ajan_uzerindeki_arac_etkilesimi(lider)
+                self._korkudan_ogren(lider)
                 self._gazi_modunu_guncelle(lider)
                 if lider.hareket_hakki_var_mi(self.harita):
                     self.lider_yapay_zeka(lider, self.harita)
@@ -1177,21 +1640,35 @@ class SuruYoneticisi:
                 oncu = ajan.onumdeki_ajan
                 if oncu and oncu.hayatta:
                     self._kavramsal_basinci_duygulara_yansit(ajan)
+                    cevre_ozeti = self.kavramsal_motor.cevre_ozeti(self.harita, ajan.x, ajan.y, ajan.z, yaricap=2)
+                    zincir_orani = min(1.0, abs(ajan.id - oncu.id) / max(1.0, len(self.ajanlar)))
+                    ajan.sinir_karari(cevre_ozeti, zincir_orani=zincir_orani)
+                    ajan.durum_matrisi_karari(cevre_ozeti)
                     self._ajan_uzerindeki_arac_etkilesimi(ajan)
+                    self._korkudan_ogren(ajan)
                     self._gazi_modunu_guncelle(ajan)
                     self._gazi_liderlik_devri(ajan)
                     if self._alt_grup_kesif_tetikle(ajan, oncu):
                         continue
 
                     # Faz 2 kalan: duygu + nesne etkisi, takipçide kopma tetikleyebilir.
-                    ozet = self.kavramsal_motor.cevre_ozeti(self.harita, ajan.x, ajan.y, ajan.z, yaricap=2)
+                    ozet = cevre_ozeti
+                    grup_koruma_tik = globals().get("SURU_GRUP_KORUMA_TIK", SURU_GRUP_KORUMA_TIK_TEMEL)
                     kopma_olasilik = 0.0
                     if ozet.get('KOTU', 0) >= 3:
-                        kopma_olasilik += 0.10
-                    if ajan.duygular['korku'] > 65:
-                        kopma_olasilik += 0.12
-                    if ajan.duygular['suphe'] > 70:
-                        kopma_olasilik += 0.12
+                        kopma_olasilik += 0.06
+                    if ajan.duygular['korku'] > 72:
+                        kopma_olasilik += 0.08
+                    if ajan.duygular['suphe'] > 78:
+                        kopma_olasilik += 0.08
+                    kopma_olasilik += ajan.kopma_egilimi * 0.65
+                    if oncu.durum_modu == "PANIK":
+                        kopma_olasilik += 0.04
+                    if oncu.durum_modu == "ITAAT" and ajan.durum_modu == "ITAAT":
+                        kopma_olasilik -= 0.04
+                    if self.toplam_tick < grup_koruma_tik:
+                        kopma_olasilik *= 0.20
+                    kopma_olasilik = max(0.0, min(0.42, kopma_olasilik))
 
                     if (not ajan.kopma_islendi) and random.random() < kopma_olasilik:
                         self.zinciri_kopar(ajan)
@@ -1207,9 +1684,22 @@ class SuruYoneticisi:
                             self._kacanlari_topla(ajan)
                         continue
 
-                    ajan.x = oncu.eski_x
-                    ajan.y = oncu.eski_y
-                    ajan.z = oncu.eski_z
+                    formasyon_hedefi = self._takipci_formasyon_adimi(
+                        ajan,
+                        oncu,
+                        genis=self.oyun_modu in ["kesif", "gezinti"],
+                    )
+                    if formasyon_hedefi is not None:
+                        self._adimi_uygula(ajan, *formasyon_hedefi)
+                    else:
+                        if self.oyun_modu == "yol_izleme":
+                            self._adimi_uygula(ajan, oncu.eski_x, oncu.eski_y, oncu.eski_z)
+                        else:
+                            rastgele_adim = self._rastgele_yurunebilir_komsu(ajan, self.harita)
+                            if rastgele_adim is not None:
+                                self._adimi_uygula(ajan, *rastgele_adim)
+                            else:
+                                self._adimi_uygula(ajan, oncu.eski_x, oncu.eski_y, oncu.eski_z)
                     ajan.zemin_kontrol(self.harita)
                     if ajan.gazi_mi:
                         self._kacanlari_topla(ajan)
@@ -1225,21 +1715,54 @@ class SuruYoneticisi:
                     self._kacanlari_topla(lider)
 
     def lider_yapay_zeka(self, lider, harita_yon):
-        """Lider AI - Faz 2 (Rol Tabanlı): Yol takibi birincil, duygu sapmaları ikincil davranış.
-        Takipçiler lider izler; lider yolu izler; kopan sürü yeni lider → yol takibine geçer."""
+        """Lider AI - Keşif önce, yol manyetik çekiş.
+        Sürü öncelikli olarak kendi yolunu araştırır/keşfeder.
+        Önceden hazır yol (omurga/A*) oyuncuya bir harita rehberidir;
+        ajan bunu 'YOL' dokusunu tercih etme şeklinde hisseder, ama onu değiştiremez.
+        Duygusal değişimlerle yolu terk edebilir, sürüden ayrılabilir."""
 
         # --- Kolektif zeka: Diğer liderlerin korku ortalamasını erken uygula ---
         toplam_korku = sum(l.duygular["korku"] for l in self.liderler)
         ortalama_korku = toplam_korku / len(self.liderler) if self.liderler else 0
-        if ortalama_korku > 60:
-            lider.duygular["korku"] = min(100, lider.duygular["korku"] + 20)
+        if ortalama_korku > 76:
+            artis = min(4.0, (ortalama_korku - 60.0) * 0.08)
+            lider.duygular["korku"] = min(100.0, lider.duygular["korku"] + artis)
+        elif ortalama_korku < 32:
+            lider.duygular["korku"] = max(0.0, lider.duygular["korku"] - 0.6)
 
         korku = lider.duygular["korku"]
         suphe = lider.duygular["suphe"]
         merak = lider.duygular["merak"]
         ozguven = lider.ozguven_puani()
+        oyun_modu = self.oyun_modu
+        nn = getattr(lider, 'nn_karar', {'hiz_carpani': 1.0, 'yon_sapma': 0.0, 'kopma_bias': 0.0})
+        lider.hiz = max(0.35, lider.temel_hiz * nn.get('hiz_carpani', 1.0))
+        merak = max(0.0, min(100.0, merak + nn.get('yon_sapma', 0.0) * 6.0))
+        korku = max(0.0, min(100.0, korku - nn.get('yon_sapma', 0.0) * 4.0))
 
-        # Faz 4 baslangici: hormon modu, karar önceliğini etkiler.
+        # Oyun modu, liderin karar profilini dogrudan etkiler.
+        if oyun_modu == "kesif":
+            merak = min(100.0, merak + 18.0)
+            suphe = max(0.0, suphe - 8.0)
+            lider.cikis_bilgisi = max(0.0, lider.cikis_bilgisi * 0.92)
+        elif oyun_modu == "gezinti":
+            merak = min(100.0, merak + 8.0)
+            suphe = max(0.0, suphe - 4.0)
+        elif oyun_modu == "yol_izleme":
+            merak = max(0.0, merak - 8.0)
+            suphe = max(0.0, suphe - 6.0)
+            lider.cikis_bilgisi = max(0.9, lider.cikis_bilgisi)
+
+        # Durum matrisi sonucu liderin anlik onceligine ince ayar uygula.
+        if lider.durum_modu == "PANIK":
+            korku = min(100, korku + 12)
+            suphe = min(100, suphe + 8)
+        elif lider.durum_modu == "KESIF":
+            merak = min(100, merak + 10)
+        elif lider.durum_modu == "ITAAT":
+            suphe = max(0, suphe - 6)
+
+        # Faz 4: hormon modu, karar önceliğini etkiler.
         if lider.mod == 'TEHDIT':
             korku = min(100, korku + 10)
             suphe = min(100, suphe + 8)
@@ -1251,18 +1774,25 @@ class SuruYoneticisi:
             'suphe': suphe,
             'merak': merak,
         })
-        serbest_dolasim = (
-            merak > 34
-            or ozguven > 46
-            or kararlar['EXPLORE'] >= kararlar['ROUTE'] * 0.82
-        )
 
-        # --- Şiddetli duygu sapmaları: yol takibini geçersiz kılar ---
-        if suphe > 60 or kararlar['PAUSE'] > max(kararlar['RETREAT'], kararlar['EXPLORE'], kararlar['ROUTE']):
-            return  # Dur, hareket etme
+        # --- Şiddetli duygu sapmaları ---
+        pause_tetik = (suphe > 84 and merak < 35) or kararlar['PAUSE'] > max(kararlar['RETREAT'], kararlar['EXPLORE'], kararlar['ROUTE'])
+        if oyun_modu in ["kesif", "gezinti"]:
+            pause_tetik = suphe > 94 and kararlar['PAUSE'] > (kararlar['EXPLORE'] + 14)
+        if pause_tetik:
+            kacis_adimi = self._serbest_adim_sec(lider, harita_yon, merak_agirlikli=False, yol_manyetizm=0.0, kacis_oncelikli=True)
+            if kacis_adimi is not None:
+                self._adimi_uygula(lider, *kacis_adimi)
+            return
 
-        if korku > 70 or kararlar['RETREAT'] > max(kararlar['PAUSE'], kararlar['EXPLORE'], kararlar['ROUTE']):
-            # Geri çekil, yol takibini kes
+        retreat_tetik = korku > 84 or kararlar['RETREAT'] > max(kararlar['PAUSE'], kararlar['EXPLORE'], kararlar['ROUTE'])
+        if oyun_modu == "kesif":
+            retreat_tetik = korku > 94 and kararlar['RETREAT'] > (kararlar['EXPLORE'] + 20)
+        if retreat_tetik:
+            kacis_adimi = self._serbest_adim_sec(lider, harita_yon, merak_agirlikli=False, yol_manyetizm=0.0, kacis_oncelikli=True)
+            if kacis_adimi is not None:
+                self._adimi_uygula(lider, *kacis_adimi)
+                return
             dx, dy = -1, 0
             hedef = self._sinirda_sapmali_hedef(lider, dx, dy)
             if hedef is not None:
@@ -1271,28 +1801,70 @@ class SuruYoneticisi:
                 if 0 <= hedef_x < HARITA_GENISLIK_PARSEL and 0 <= hedef_y < HARITA_YUKSEKLIK_PARSEL:
                     geri_parsel = harita_yon.map_grid[lider.z][hedef_y][hedef_x]
                     if geri_parsel and geri_parsel.yurunebilir and not geri_parsel.hasar_verir:
-                        lider.x, lider.y = hedef_x, hedef_y
+                        self._adimi_uygula(lider, hedef_x, hedef_y, lider.z)
             return
 
-        if serbest_dolasim:
-            serbest_adim = self._serbest_adim_sec(lider, harita_yon, merak_agirlikli=True)
-            if serbest_adim is not None and (not lider.yol or random.random() < 0.35 + min(0.25, merak / 180.0)):
-                self._adimi_uygula(lider, *serbest_adim)
+        # ===================================================================
+        # BİRİNCİL DAVRANIŞ: SERBEST KEŞİF
+        # Ajan çevresini skorlayarak en iyi hücreyi seçer.
+        # YOL tile'ları özel bir manyetik çekiş alır (cikis_bilgisi'ne göre),
+        # bu da sürünün yolu dolaşık şekilde izlemesini sağlar ama bağlamaz.
+        # ===================================================================
+        yol_manyetizm = lider.cikis_bilgisi
+        if oyun_modu == "kesif":
+            yol_manyetizm *= 0.15
+        elif oyun_modu == "gezinti":
+            yol_manyetizm *= 0.35
+        elif oyun_modu == "yol_izleme":
+            yol_manyetizm = max(1.2, lider.cikis_bilgisi + 0.8)
+
+        kesif_adim = self._serbest_adim_sec(
+            lider, harita_yon,
+            merak_agirlikli=True,
+            yol_manyetizm=yol_manyetizm,
+        )
+
+        if oyun_modu == "yol_izleme" and random.random() > 0.14:
+            kesif_adim = None
+        elif oyun_modu == "gezinti" and random.random() < 0.35:
+            rastgele_adim = self._rastgele_yurunebilir_komsu(lider, harita_yon)
+            if rastgele_adim is not None:
+                kesif_adim = rastgele_adim
+
+        if kesif_adim is not None:
+            # Keşfi uygula: yolu HİÇ kullanma, yalnızca skora bakarak gitmeyi seç.
+            # Tek istisna: merak ÇOK düşük VE ozguven ÇOK düşük VE path var ->
+            # 'güvenli yolu' tercih et (aşağıdaki path-fallback bloğu devreye girer).
+            cok_dusuk_merak = merak < 15 and ozguven < 20
+            if oyun_modu in ["kesif", "gezinti"]:
+                self._adimi_uygula(lider, *kesif_adim)
+                return
+            if not cok_dusuk_merak and oyun_modu != "yol_izleme":
+                self._adimi_uygula(lider, *kesif_adim)
                 return
 
-        # --- Yol takibi artık öneri ağırlıklıdır; lider isterse keşfe sapabilir ---
+        # ===================================================================
+        # İKİNCİL DAVRANIŞ: YOL FALLBACK
+        # Keşif başarısız olduğunda VEYA ajan yeterince pasif olduğunda
+        # hazır omurga/A* yolundan bir sonraki adım kullanılır.
+        # ===================================================================
+        fallback_yol = (
+            oyun_modu == "yol_izleme"
+            or kesif_adim is None
+            or (oyun_modu == "normal" and korku > 60)
+            or (oyun_modu == "gezinti" and random.random() < 0.35)
+        )
+        if not fallback_yol:
+            return
+
         if not lider.yol or lider.yol_index >= len(lider.yol):
             lider.yol_bul(harita_yon)
 
-        yol_onceligi = kararlar['ROUTE'] + lider.cikis_bilgisi * 35.0 - merak * 0.35 + max(0.0, 55.0 - ozguven) * 0.20
-        kesif_onceligi = kararlar['EXPLORE'] + merak * 0.35 + ozguven * 0.20
-
-        if lider.yol and lider.yol_index < len(lider.yol) and yol_onceligi >= kesif_onceligi * 0.92:
+        if lider.yol and lider.yol_index < len(lider.yol):
             hedef_x, hedef_y, hedef_z = lider.yol[lider.yol_index]
             hedef_parsel = self.harita.map_grid[hedef_z][hedef_y][hedef_x]
             hedef_etiketi = self.kavramsal_motor.parsel_etiketi(hedef_parsel)
 
-            # Faz 2 kalan + Faz 3 başlangıcı: kavramsal riskte yoldan sapma kararı.
             if hedef_etiketi in ['KOTU', 'KULLANILAMAZ']:
                 lider.duygular['korku'] = min(100, lider.duygular['korku'] + 10)
                 lider.duygular['suphe'] = min(100, lider.duygular['suphe'] + 8)
@@ -1313,24 +1885,16 @@ class SuruYoneticisi:
                     lider.yon = 'sag' if dx >= 0 else 'sol'
                 else:
                     lider.yon = 'asagi' if dy >= 0 else 'yukari'
-                lider.x, lider.y, lider.z = hedef_x, hedef_y, hedef_z
+                self._adimi_uygula(lider, hedef_x, hedef_y, hedef_z)
                 lider.yol_index += 1
                 return
             lider.yol = []
             lider.yol_index = 0
 
-        # --- İkincil davranış: Keşif yürüyüşü (yol bulunamadığında devreye girer) ---
-        serbest_adim = self._serbest_adim_sec(lider, harita_yon, merak_agirlikli=(merak > 28 or kararlar['EXPLORE'] > kararlar['ROUTE']))
-        if serbest_adim is not None:
-            self._adimi_uygula(lider, *serbest_adim)
-            return
-
-        if merak > 50 or kararlar['EXPLORE'] > kararlar['ROUTE']:
-            yonler = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-        else:
-            yonler = [(1, 0), (1, 0), (0, 1), (0, -1), (-1, 0)]
-        dx, dy = random.choice(yonler)
-
+        # --- Son çare: rastgele adım ---
+        yonler = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        random.shuffle(yonler)
+        dx, dy = yonler[0]
         hedef = self._sinirda_sapmali_hedef(lider, dx, dy)
         if hedef is None:
             return
@@ -1345,39 +1909,20 @@ class SuruYoneticisi:
             return
 
         hedef_parsel = self.harita.map_grid[lider.z][hedef_y][hedef_x]
+        if hedef_parsel and hedef_parsel.yurunebilir and not hedef_parsel.hasar_verir:
+            self._adimi_uygula(lider, hedef_x, hedef_y, lider.z)
 
-        if not hedef_parsel.yurunebilir or hedef_parsel.hasar_verir:
-            lider.yol = []
-            lider.yol_index = 0
-            lider.yol_bul(self.harita)
-            hedef_y_alt = lider.y + 1
-            if 0 <= hedef_y_alt < HARITA_YUKSEKLIK_PARSEL:
-                alt_parsel = self.harita.map_grid[lider.z][hedef_y_alt][lider.x]
-                if alt_parsel.yurunebilir and not alt_parsel.hasar_verir:
-                    lider.y = hedef_y_alt
-                    return
-            hedef_y_ust = lider.y - 1
-            if 0 <= hedef_y_ust < HARITA_YUKSEKLIK_PARSEL:
-                ust_parsel = self.harita.map_grid[lider.z][hedef_y_ust][lider.x]
-                if ust_parsel.yurunebilir and not ust_parsel.hasar_verir:
-                    lider.y = hedef_y_ust
-                    return
-            return
-
-        if hedef_parsel.uzerindeki_alet:
-            lider.duygular["korku"] += 20
-            lider.yol = []
-            lider.yol_index = 0
-            lider.yol_bul(self.harita)
-            return
-
-        lider.x = hedef_x
-        lider.y = hedef_y
-
-    def _serbest_adim_sec(self, ajan, harita_yon, merak_agirlikli=False):
+    def _serbest_adim_sec(self, ajan, harita_yon, merak_agirlikli=False, yol_manyetizm=0.0, kacis_oncelikli=False):
+        """Çevredeki hücreleri skorlayarak en iyi serbest adımı seçer.
+        yol_manyetizm (0-1): YOL dokusuna ek manyetik çekim. ajan cikis_bilgisi ile orantili."""
         en_iyi = None
         en_iyi_skor = float('-inf')
         ozguven = ajan.ozguven_puani()
+        mevcut_parsel = harita_yon.map_grid[ajan.z][ajan.y][ajan.x]
+        mevcut_profil = self.kavramsal_motor.parsel_profili(mevcut_parsel) if mevcut_parsel else self.kavramsal_motor.parsel_profili(None)
+        mevcut_risk = self._parsel_risk_skoru(mevcut_parsel, mevcut_profil)
+        # YOL manyetizm bonusu: 0-12 arası, cikis_bilgisi tam bilgi = +12
+        yol_bonus_ek = yol_manyetizm * 3.0   # max +3 (IYI tile max +8'in cok altinda, sadece hafif cekim)
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             nx, ny = ajan.x + dx, ajan.y + dy
             if not (0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL):
@@ -1388,6 +1933,7 @@ class SuruYoneticisi:
 
             profil = self.kavramsal_motor.parsel_profili(parsel)
             etiket = profil['etiket']
+            aday_risk = self._parsel_risk_skoru(parsel, profil)
             skor = 0.0
             if etiket == 'IYI':
                 skor += 8.0
@@ -1399,7 +1945,10 @@ class SuruYoneticisi:
                 skor -= 10.0
 
             if getattr(parsel, 'doku_id', '') == 'YOL':
-                skor += 4.0
+                skor += yol_bonus_ek  # cikis_bilgisi yukseldikce hafif cekim, max +3
+
+            doluluk = self._hucre_dolulu_skoru(nx, ny, ajan.z, haric_id=ajan.id)
+            skor -= doluluk * 6.0
 
             ilgili_beceri = profil.get('ilgili_beceri', 'direnc')
             beceri_seviyesi = ajan.beceriler.get(ilgili_beceri, 0.0)
@@ -1416,21 +1965,46 @@ class SuruYoneticisi:
                 skor += beceri_seviyesi * 1.1
 
             tercih = ajan.nesne_tercihleri.get(profil.get('nesne', ''), 0.0)
-            skor += tercih * (2.4 if merak_agirlikli else 1.2)
+            skor += tercih * ((0.35 if kacis_oncelikli else 2.4) if merak_agirlikli else (0.25 if kacis_oncelikli else 1.2))
 
-            skor += ajan.duygular.get('merak', 0.0) * (0.20 if merak_agirlikli else 0.08)
+            if kacis_oncelikli:
+                rahatlama = mevcut_risk - aday_risk
+                skor += rahatlama * 4.6
+                skor += ajan.beceriler.get('engelden_kacma', 0.0) * 2.1
+                if mevcut_profil.get('etiket') == 'KOTU' and etiket != 'KOTU':
+                    skor += 10.0
+                if getattr(parsel, 'doku_id', '') in ['SU_GOL', 'DENIZ']:
+                    skor += ajan.beceriler.get('yuzme', 0.0) * 2.2
+                if getattr(parsel, 'doku_id', '') in ['DAG', 'DIK_DAG', 'PLATO', 'MERDIVEN_YUKARI', 'MERDIVEN_ASAGI']:
+                    skor += ajan.beceriler.get('tirmanma', 0.0) * 2.0
+                if etiket == 'KOTU':
+                    skor -= 8.0
+
+            skor += ajan.duygular.get('merak', 0.0) * (0.25 if merak_agirlikli else 0.11)
             skor += ozguven * 0.10
-            skor -= ajan.duygular.get('korku', 0.0) * 0.08
-            skor -= ajan.duygular.get('suphe', 0.0) * 0.07
+            skor -= ajan.duygular.get('korku', 0.0) * 0.05
+            skor -= ajan.duygular.get('suphe', 0.0) * 0.06
             skor -= (getattr(parsel, 'yavaslatma_katsayisi', 1.0) - 1.0) * 1.8
 
             if skor > en_iyi_skor:
                 en_iyi_skor = skor
                 en_iyi = (nx, ny, ajan.z)
 
-        if en_iyi_skor < 2.0:
+        if en_iyi_skor < (-1.5 if kacis_oncelikli else 2.0):
             return None
         return en_iyi
+
+    def _ajan_konumunu_ata(self, ajan, hedef_x, hedef_y, hedef_z):
+        ajan.x, ajan.y, ajan.z = hedef_x, hedef_y, hedef_z
+        rota = getattr(ajan, 'son_konumlar', None)
+        if rota is None:
+            rota = []
+            ajan.son_konumlar = rota
+        yeni = (hedef_x, hedef_y, hedef_z)
+        if not rota or rota[-1] != yeni:
+            rota.append(yeni)
+            if len(rota) > 8:
+                del rota[0:len(rota) - 8]
 
     def _adimi_uygula(self, ajan, hedef_x, hedef_y, hedef_z):
         dx = hedef_x - ajan.x
@@ -1439,12 +2013,57 @@ class SuruYoneticisi:
             ajan.yon = 'sag' if dx >= 0 else 'sol'
         else:
             ajan.yon = 'asagi' if dy >= 0 else 'yukari'
-        ajan.x, ajan.y, ajan.z = hedef_x, hedef_y, hedef_z
+        self._ajan_konumunu_ata(ajan, hedef_x, hedef_y, hedef_z)
+
+    def _rastgele_yurunebilir_komsu(self, ajan, harita_yon):
+        adaylar = []
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            nx, ny = ajan.x + dx, ajan.y + dy
+            if not (0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL):
+                continue
+            parsel = harita_yon.map_grid[ajan.z][ny][nx]
+            if parsel and parsel.yurunebilir and not parsel.hasar_verir:
+                adaylar.append((nx, ny, ajan.z))
+        if not adaylar:
+            return None
+        return random.choice(adaylar)
 
     def _takipci_serbest_adim(self, ajan, oncu):
-        if ajan.duygular.get('merak', 0.0) < 28 and ajan.ozguven_puani() < 44:
+        oyun_modu = self.oyun_modu
+        if oyun_modu == "yol_izleme":
             return False
-        if random.random() > 0.18:
+
+        if ajan.durum_modu == "PANIK" or ajan.duygular.get('korku', 0.0) > 68 or ajan.kavramsal_durum == 'KOTU':
+            hedef = self._serbest_adim_sec(ajan, self.harita, merak_agirlikli=False, yol_manyetizm=0.0, kacis_oncelikli=True)
+            if hedef is not None:
+                hedef_x, hedef_y, hedef_z = hedef
+                self._adimi_uygula(ajan, hedef_x, hedef_y, hedef_z)
+                return True
+
+        merak_esik = 28
+        ozguven_esik = 44
+        if oyun_modu == "kesif":
+            merak_esik = 10
+            ozguven_esik = 20
+        elif oyun_modu == "gezinti":
+            merak_esik = -1
+            ozguven_esik = -1
+
+        if ajan.duygular.get('merak', 0.0) < merak_esik and ajan.ozguven_puani() < ozguven_esik:
+            return False
+        serbestlesme = 0.10 + ajan.duygular.get('merak', 0.0) / 280.0 + ajan.ozguven_puani() / 320.0
+        if oyun_modu == "kesif":
+            serbestlesme += 0.16
+        elif oyun_modu == "gezinti":
+            serbestlesme += 0.08
+
+        olasilik_tavan = 0.42
+        if oyun_modu == "kesif":
+            olasilik_tavan = 0.68
+        elif oyun_modu == "gezinti":
+            olasilik_tavan = 0.58
+
+        if random.random() > min(olasilik_tavan, serbestlesme):
             return False
 
         hedef = self._serbest_adim_sec(ajan, self.harita, merak_agirlikli=True)
@@ -1454,11 +2073,36 @@ class SuruYoneticisi:
         hedef_x, hedef_y, hedef_z = hedef
         if hedef_z != oncu.eski_z:
             return False
-        if abs(hedef_x - oncu.eski_x) > 2 or abs(hedef_y - oncu.eski_y) > 2:
+        mesafe_limiti = 1 if oyun_modu == "normal" else (2 if oyun_modu == "kesif" else 3)
+        if abs(hedef_x - oncu.eski_x) > mesafe_limiti or abs(hedef_y - oncu.eski_y) > mesafe_limiti:
             return False
 
         self._adimi_uygula(ajan, hedef_x, hedef_y, hedef_z)
         return True
+
+    def _takipci_formasyon_adimi(self, ajan, oncu, genis=False):
+        yaricap = 2 if genis else 1
+        adaylar = []
+        for dy in range(-yaricap, yaricap + 1):
+            for dx in range(-yaricap, yaricap + 1):
+                nx = oncu.eski_x + dx
+                ny = oncu.eski_y + dy
+                if not (0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL):
+                    continue
+                parsel = self.harita.map_grid[oncu.eski_z][ny][nx]
+                if not parsel or not parsel.yurunebilir or parsel.hasar_verir:
+                    continue
+                uzaklik = abs(nx - ajan.x) + abs(ny - ajan.y)
+                oncu_yakini = abs(nx - oncu.eski_x) + abs(ny - oncu.eski_y)
+                doluluk = self._hucre_dolulu_skoru(nx, ny, oncu.eski_z, haric_id=ajan.id)
+                adaylar.append((uzaklik + oncu_yakini * 0.35 + doluluk * 2.8, nx, ny, oncu.eski_z))
+
+        if not adaylar:
+            return None
+
+        adaylar.sort(key=lambda item: item[0])
+        _, hedef_x, hedef_y, hedef_z = adaylar[0]
+        return hedef_x, hedef_y, hedef_z
 
     def _hedefe_gecis_izinli(self, lider, hedef_x, hedef_y, hedef_z):
         if hedef_z == lider.z:
@@ -1472,8 +2116,14 @@ class SuruYoneticisi:
             return False
 
         if hedef_z > lider.z:
-            return mevcut.doku_id == 'MERDIVEN_YUKARI' and hedef.doku_id == 'MERDIVEN_ASAGI'
-        return mevcut.doku_id == 'MERDIVEN_ASAGI' and hedef.doku_id == 'MERDIVEN_YUKARI'
+            return (
+                (mevcut.doku_id == 'MERDIVEN_YUKARI' and hedef.doku_id == 'MERDIVEN_ASAGI')
+                or (mevcut.doku_id == 'ASANSOR_YUKARI' and hedef.doku_id == 'ASANSOR_ASAGI')
+            )
+        return (
+            (mevcut.doku_id == 'MERDIVEN_ASAGI' and hedef.doku_id == 'MERDIVEN_YUKARI')
+            or (mevcut.doku_id == 'ASANSOR_ASAGI' and hedef.doku_id == 'ASANSOR_YUKARI')
+        )
 
     def _sinirda_sapmali_hedef(self, lider, dx, dy):
         """Sınırda takılmayı azaltmak için 45/135 derece benzeri sapmalarla alternatif hedef üretir.
@@ -1495,23 +2145,38 @@ class SuruYoneticisi:
         
         # Sapma alternatifleri (kenardan kaçışa yönelik)
         if dx != 0 and dy == 0:
-            # Yatay hareket yapıyorsa, sapık yönler: tersine ve dikey
+            # Yatay hareket yapıyorsa, sapma yönleri: tersine ve dikey
             adaylar.extend([(-dx, 1), (-dx, -1), (0, 1), (0, -1), (-dx, 0)])
         elif dy != 0 and dx == 0:
-            # Dikey hareket yapıyorsa, sapık yönler: tersine ve yatay
+            # Dikey hareket yapıyorsa, sapma yönleri: tersine ve yatay
             adaylar.extend([(1, -dy), (-1, -dy), (1, 0), (-1, 0), (0, -dy)])
         else:
-            # Köşegen hareketi varsa, türlü sapkınlıklar içeren alternatifler
+            # Köşegen hareketi varsa, türlü sapma yonleri içeren alternatifler
             adaylar.extend([(-dx, dy), (dx, -dy), (-dx, -dy), (1, 0), (-1, 0), (0, 1), (0, -1)])
 
         gorulen = set()
+        aday_skorlari = []
+        rota = getattr(lider, 'son_konumlar', [])
+        sonlar = set(rota[-3:])
         for adx, ady in adaylar:
             if (adx, ady) in gorulen:
                 continue
             gorulen.add((adx, ady))
             nx, ny = lider.x + adx, lider.y + ady
             if 0 <= nx < HARITA_GENISLIK_PARSEL and 0 <= ny < HARITA_YUKSEKLIK_PARSEL:
-                return nx, ny
+                parsel = self.harita.map_grid[lider.z][ny][nx]
+                if not parsel or not parsel.yurunebilir or parsel.hasar_verir:
+                    continue
+                ceza = 0
+                if (nx, ny, lider.z) in sonlar:
+                    ceza += 4
+                if getattr(parsel, 'bogulma_riski', False) or getattr(parsel, 'doku_id', '') in ['SU_GOL', 'DENIZ']:
+                    ceza += 3
+                aday_skorlari.append((ceza, nx, ny))
+
+        if aday_skorlari:
+            aday_skorlari.sort(key=lambda item: item[0])
+            return aday_skorlari[0][1], aday_skorlari[0][2]
 
         # Hiçbir alternatif bulamadı (çok dar alan), hareket etme
         return None
@@ -1573,3 +2238,16 @@ class SuruYoneticisi:
             kd = getattr(ajan, 'kavramsal_durum', 'KULLANILABILIR')
             nokta_renk = _kd_renkleri.get(kd, (180, 180, 180))
             pygame.draw.circle(surface, nokta_renk, (px_x + PARSEK_BOYUTU - 5, px_y + 5), 3)
+
+            # Ajan numarası — sol üst köşe
+            ajan_id_str = f"A{ajan.id}" if getattr(ajan, 'amigdala_aktif', False) else str(ajan.id)
+            id_font_size = max(14, PARSEK_BOYUTU // 2)
+            try:
+                id_font = pygame.font.Font(None, id_font_size)
+                # Gölge (okunabilirlik için koyu arka plan)
+                id_shadow = id_font.render(ajan_id_str, True, (0, 0, 0))
+                surface.blit(id_shadow, (px_x + 3, px_y + 2))
+                id_surf = id_font.render(ajan_id_str, True, (255, 255, 100))
+                surface.blit(id_surf, (px_x + 2, px_y + 1))
+            except:
+                pass  # Font oluşturulamazsa, no problem

@@ -89,3 +89,30 @@ sesler/ klasörüne aşağıdaki dosyaları ekleyin:
 - arka_plan.sid (veya .wav/.mp3): Arka plan müziği
 - arac_yerlestir.wav: Araç yerleştirme sesi
 - ajan_ol.wav: Ajan ölme sesi
+
+## 21 Mart 2026 Güncel Durum
+
+- Doğru çalıştırma komutu (venv):
+	- `cd c:\Users\mete\Zotero\lemm`
+	- `.venv\Scripts\python.exe ters_lemmings/main.py`
+- Harita artık düzenleme modunda ZeminDuz ile ezilmiyor; doğal katman üretimi korunuyor.
+- Etki alanı görselleştirmesi ve araç etkisi ±2 (5x5x5) olarak güncellendi.
+- Giriş ve çıkış farklı katman zorunluluğu eklendi.
+- Her katmanda en az bir yürünebilir yol garanti edildi.
+- Oyun başladıktan sonra da 1-0 ile araç seçimi, sol tık ile yerleştirme, sağ tık ile kaldırma ve tekrar kullanım aktif.
+- Alt bilgi satırı açık gri ve kalın font ile okunur hale getirildi.
+
+## 22 Mart 2026 Yol Haritası Özeti
+
+Gemini tasarım bağlantısı incelendi ve mevcut oyun kodu ile karşılaştırıldı. Bu turda kod değil, uygulama sırası netleştirildi.
+
+Planlanan ana fazlar:
+
+1. Harita oluşturulurken girişten çıkışa tüm katmanları bağlayan kesintisiz ana yol ve merdiven sistemi.
+2. Sürü davranışında lider takibinden önce yol takibinin merkez alınması.
+3. Nesneleri iyi, kötü, çirkin, kullanılabilir gibi yorumlayacak anlamsal üst akıl katmanı.
+4. Mevcut duygu yapısını bozmadan kalp-beyin-hormon katmanının genişletilmesi.
+5. Oyuncu araçlarının fiziksel etkilerinin yanında duygusal etki alanlarının eklenmesi.
+6. Gazi modu, kriz anında liderlik devri ve kaçan ajanları toplama davranışları.
+7. Evrimsel hafıza, benzersiz genom arşivi ve reset sonrası başlangıç genomuna dönüş sistemi.
+8. Ajan üstü emoji balonları ve oyuncu okunabilirliğini artıran geri bildirimler.

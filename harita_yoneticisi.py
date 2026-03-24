@@ -132,6 +132,18 @@ class Col(Parsel):
         super().__init__(x, y, z, 'COL')
         self.yavaslatma_katsayisi = 1.6 # Çöl, çok yavaş
 
+
+class AsansorYukari(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'ASANSOR_YUKARI')
+        self.yavaslatma_katsayisi = 0.9
+
+
+class AsansorAsagi(Parsel):
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z, 'ASANSOR_ASAGI')
+        self.yavaslatma_katsayisi = 0.9
+
 # --- OYUNCU ALETLERİ ---
 
 class OyuncuAleti:
@@ -177,6 +189,64 @@ class OyuncuAleti:
             'duygu': {'korku': 1.0, 'suphe': 5.0, 'merak': 2.0},
             'hormon': {'oksitosin': -2.0, 'kortizol': 2.0, 'dopamin': 1.0}
         },
+        'FeromonIstasyonu': {
+            'duygu': {'korku': -5.0, 'suphe': -6.0, 'merak': 2.0},
+            'hormon': {'oksitosin': 12.0, 'serotonin': 4.0, 'kortizol': -3.0}
+        },
+        'OforiGazi': {
+            'duygu': {'korku': -8.0, 'suphe': -2.0, 'merak': 10.0},
+            'hormon': {'dopamin': 12.0, 'serotonin': 5.0, 'adrenalin': 2.0}
+        },
+        'KorkuGazi': {
+            'duygu': {'korku': 14.0, 'suphe': 7.0, 'merak': -4.0},
+            'hormon': {'adrenalin': 10.0, 'kortizol': 8.0, 'husran': 3.0}
+        },
+        'DonmaAlani': {
+            'duygu': {'korku': 6.0, 'suphe': 12.0, 'merak': -6.0},
+            'hormon': {'kortizol': 10.0, 'adrenalin': 4.0}
+        },
+        'DepresifAlan': {
+            'duygu': {'korku': 5.0, 'suphe': 10.0, 'merak': -10.0},
+            'hormon': {'serotonin': -10.0, 'husran': 9.0, 'dopamin': -5.0}
+        },
+        'SosyalAyna': {
+            'duygu': {'korku': 3.0, 'suphe': 13.0, 'merak': 1.0},
+            'hormon': {'oksitosin': -8.0, 'kortizol': 5.0}
+        },
+        'EngelYansitici': {
+            'duygu': {'korku': 4.0, 'suphe': 8.0, 'merak': 0.0},
+            'hormon': {'kortizol': 5.0, 'adrenalin': 3.0}
+        },
+        'SesYayici': {
+            'duygu': {'korku': 2.0, 'suphe': 6.0, 'merak': 4.0},
+            'hormon': {'dopamin': 2.0, 'kortizol': 2.0}
+        },
+        'GolgeRehber': {
+            'duygu': {'korku': -2.0, 'suphe': -1.0, 'merak': 6.0}, #suphe 8.0 di indirdim.
+            'hormon': {'oksitosin': 3.0, 'dopamin': 4.0, 'kortizol': 3.0}
+        },
+        'KaosCekirdegi': {
+            'duygu': {'korku': 7.0, 'suphe': 12.0, 'merak': 9.0},
+            'hormon': {'adrenalin': 6.0, 'dopamin': 6.0, 'husran': 4.0}
+        },
+    }
+    # Korku artiran araclarin etkisini araca ozel yumusat.
+    KORKU_CARPANLARI = {
+        'Mancinik': 0.45,
+        'Ayna': 0.35,
+        'Bariyer': 0.25,
+        'Ates': 0.55,
+        'SahteYol': 0.30,
+        'SendeletmeTasi': 0.40,
+        'GizliCukur': 0.70,
+        'KiymaMakinesi': 0.75,
+        'KorkuGazi': 0.85,
+        'DonmaAlani': 0.50,
+        'DepresifAlan': 0.45,
+        'SosyalAyna': 0.35,
+        'EngelYansitici': 0.35,
+        'SesYayici': 0.30,
+        'KaosCekirdegi': 0.55,
     }
 
     def __init__(self, x, y, z, doku_id, arac_turu):
@@ -215,8 +285,17 @@ class OyuncuAleti:
 
         duygular = tablo.get('duygu', {})
         for ad, delta in duygular.items():
+            if ad == 'korku' and delta > 0.0:
+                delta *= self.KORKU_CARPANLARI.get(arac_adi, 0.5)
+                if getattr(ajan, 'gazi_mi', False):
+                    delta *= 0.58
+                if getattr(ajan, 'lider_mi', False):
+                    delta *= 0.78
             mevcut = ajan.duygular.get(ad, 0.0)
             ajan.duygular[ad] = max(0.0, min(100.0, mevcut + delta * siddet))
+
+        # Merak omurgasini koru: korku merkezli kilitlenmeyi azalt.
+        ajan.duygular['merak'] = max(0.0, min(100.0, ajan.duygular.get('merak', 0.0) + 0.08 * siddet))
 
         biyolojik = getattr(ajan, 'biyolojik_sistem', None)
         if biyolojik:
@@ -290,7 +369,7 @@ class Mancinik(OyuncuAleti):
                     ajan.y = hedef_y
 
                 ajan.hiz *= 1.6
-                ajan.duygular['korku'] = min(100, ajan.duygular.get('korku', 0) + 18)
+                ajan.duygular['korku'] = min(100, ajan.duygular.get('korku', 0) + 8)
                 self.psikobiyolojik_etki_uygula(ajan, siddet=1.0)
 
         self.etki_altindakiler = mevcutlar
@@ -380,7 +459,7 @@ class Ayna(OyuncuAleti):
                     ajan.yon = 'asagi'
                 elif ajan.yon == 'asagi':
                     ajan.yon = 'yukari'
-                ajan.duygular['korku'] += 0.1  # Korku artır
+                ajan.duygular['korku'] += 0.03
                 self.psikobiyolojik_etki_uygula(ajan, siddet=0.7)
 
 class Bariyer(OyuncuAleti):
@@ -412,7 +491,7 @@ class Ates(OyuncuAleti):
             if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
                 ajan.can -= 20  # Hasar ver
                 ajan.hiz *= 1.2  # Hızlandır
-                ajan.duygular['korku'] += 0.2
+                ajan.duygular['korku'] += 0.06
                 self.psikobiyolojik_etki_uygula(ajan, siddet=1.2)
 
 class CikisOku(OyuncuAleti):
@@ -440,6 +519,156 @@ class SahteYol(OyuncuAleti):
         for ajan in ajanlar:
             if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
                 self.psikobiyolojik_etki_uygula(ajan, siddet=1.0)
+
+
+class FeromonIstasyonu(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'FEROMON', arac_turu)
+        self.maks_kapasite = 40
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=0.85)
+
+
+class OforiGazi(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'OFORI', arac_turu)
+        self.maks_kapasite = 26
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=1.0)
+                ajan.hiz *= 1.08
+
+
+class KorkuGazi(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'KORKU_GAZI', arac_turu)
+        self.maks_kapasite = 24
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=1.0)
+
+
+class DonmaAlani(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'DONMA', arac_turu)
+        self.maks_kapasite = 30
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=0.9)
+                ajan.hiz *= 0.72
+                if hasattr(ajan, 'hareket_birikimi'):
+                    ajan.hareket_birikimi = min(ajan.hareket_birikimi, 0.65)
+
+
+class DepresifAlan(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'DEPRESIF', arac_turu)
+        self.maks_kapasite = 22
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=0.95)
+
+
+class SosyalAyna(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'SOSYAL_AYNA', arac_turu)
+        self.maks_kapasite = 26
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=0.92)
+
+
+class EngelYansitici(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'ENGEL_YANSITICI', arac_turu)
+        self.maks_kapasite = 18
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=0.8)
+
+
+class SesYayici(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'SES_YAYICI', arac_turu)
+        self.maks_kapasite = 24
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                siddet = 0.7 + random.random() * 0.5
+                self.psikobiyolojik_etki_uygula(ajan, siddet=siddet)
+
+
+class GolgeRehber(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'GOLGE_REHBER', arac_turu)
+        self.maks_kapasite = 20
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI + 1 and abs(ajan.y - self.y) <= ETKI_YARICAPI + 1 and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=0.9)
+                dx = self.x - ajan.x
+                dy = self.y - ajan.y
+                if abs(dx) >= abs(dy):
+                    ajan.yon = 'sag' if dx >= 0 else 'sol'
+                else:
+                    ajan.yon = 'asagi' if dy >= 0 else 'yukari'
+
+
+class KaosCekirdegi(OyuncuAleti):
+    def __init__(self, x, y, z, arac_turu):
+        super().__init__(x, y, z, 'KAOS_CEKIRDEGI', arac_turu)
+        self.maks_kapasite = 14
+
+    def etki_uygula(self, ajanlar, harita_yon=None):
+        if not self.kullan():
+            return
+        for ajan in ajanlar:
+            if abs(ajan.x - self.x) <= ETKI_YARICAPI and abs(ajan.y - self.y) <= ETKI_YARICAPI and abs(ajan.z - self.z) <= ETKI_YARICAPI:
+                self.psikobiyolojik_etki_uygula(ajan, siddet=1.1)
+                if hasattr(ajan, 'beyin') and ajan.beyin is not None:
+                    try:
+                        ajan.beyin = type(ajan.beyin)(
+                            girdi_sayisi=getattr(ajan.beyin, 'girdi_sayisi', 11),
+                            gizli_sayisi=getattr(ajan.beyin, 'gizli_sayisi', 5),
+                            cikti_sayisi=getattr(ajan.beyin, 'cikti_sayisi', 3),
+                        )
+                    except Exception:
+                        pass
 # --- 🗄️ HARİTA VERİ YÖNETİCİSİ (Çok Boyutlu Dizi) ---
 
 class HaritaYoneticisi:
@@ -461,6 +690,8 @@ class HaritaYoneticisi:
             self.cikis_katman = random.randint(0, self.max_katman - 1)
         self.giris_x, self.giris_y = 0, random.randint(0, HARITA_YUKSEKLIK_PARSEL - 1)
         self.cikis_x, self.cikis_y = HARITA_GENISLIK_PARSEL - 1, random.randint(0, HARITA_YUKSEKLIK_PARSEL - 1)
+        self.omurga_baslangic_x = self.giris_x
+        self.omurga_baslangic_y = self.giris_y
         
         # Haritayı rastgele oluştur
         self.rastgele_harita_olustur()
@@ -492,6 +723,16 @@ class HaritaYoneticisi:
             GizliCukur: 'GizliCukur',
             KiymaMakinesi: 'KiymaMakinesi',
             Yonlendirici: 'Yonlendirici',
+            FeromonIstasyonu: 'FeromonIstasyonu',
+            OforiGazi: 'OforiGazi',
+            KorkuGazi: 'KorkuGazi',
+            DonmaAlani: 'DonmaAlani',
+            DepresifAlan: 'DepresifAlan',
+            SosyalAyna: 'SosyalAyna',
+            EngelYansitici: 'EngelYansitici',
+            SesYayici: 'SesYayici',
+            GolgeRehber: 'GolgeRehber',
+            KaosCekirdegi: 'KaosCekirdegi',
         }
 
         grid = []
@@ -594,6 +835,8 @@ class HaritaYoneticisi:
             'CALILIK': Calilik,
             'TASLIK': Taslik,
             'COL': Col,
+            'ASANSOR_YUKARI': AsansorYukari,
+            'ASANSOR_ASAGI': AsansorAsagi,
         }
 
         alet_siniflari = {
@@ -607,6 +850,16 @@ class HaritaYoneticisi:
             'GizliCukur': GizliCukur,
             'KiymaMakinesi': KiymaMakinesi,
             'Yonlendirici': Yonlendirici,
+            'FeromonIstasyonu': FeromonIstasyonu,
+            'OforiGazi': OforiGazi,
+            'KorkuGazi': KorkuGazi,
+            'DonmaAlani': DonmaAlani,
+            'DepresifAlan': DepresifAlan,
+            'SosyalAyna': SosyalAyna,
+            'EngelYansitici': EngelYansitici,
+            'SesYayici': SesYayici,
+            'GolgeRehber': GolgeRehber,
+            'KaosCekirdegi': KaosCekirdegi,
         }
 
         grid = veri.get('grid', [])
@@ -663,6 +916,8 @@ class HaritaYoneticisi:
             'CALILIK': Calilik,
             'TASLIK': Taslik,
             'COL': Col,
+            'ASANSOR_YUKARI': AsansorYukari,
+            'ASANSOR_ASAGI': AsansorAsagi,
         }
 
         komsular = [
@@ -741,10 +996,12 @@ class HaritaYoneticisi:
                         parsel.derinlik = su_derinligi_hesapla(x, y, secilen_tur)
                     self.map_grid[kat][y][x] = parsel
 
-            # Her katmanda en az bir yürünebilir omurga yol.
-            yol_y = random.randint(0, HARITA_YUKSEKLIK_PARSEL - 1)
-            for x in range(HARITA_GENISLIK_PARSEL):
-                self.map_grid[kat][yol_y][x] = Yol(x, yol_y, kat)
+            # Tam kat genişliği boyunca sabit yol vermiyoruz; bu sürüyü gereksizce raya sokuyor.
+            acik_basla = random.randint(2, max(3, HARITA_GENISLIK_PARSEL // 3))
+            acik_uzunluk = random.randint(6, 10)
+            acik_y = random.randint(0, HARITA_YUKSEKLIK_PARSEL - 1)
+            for x in range(acik_basla, min(HARITA_GENISLIK_PARSEL, acik_basla + acik_uzunluk)):
+                self.map_grid[kat][acik_y][x] = ZeminDuz(x, acik_y, kat)
         
         # Giriş ve çıkış ayarla
         if self.map_grid[self.giris_katman][self.giris_y][self.giris_x]:
@@ -800,6 +1057,19 @@ class HaritaYoneticisi:
             sonuc.append((x2, y, kat))
         return sonuc
 
+    def _giris_koridoru_ac(self, kat, x1, y1, x2, y2):
+        for xx, yy, _ in self._omurga_rota_segment(kat, x1, y1, x2, y2):
+            parsel = self.map_grid[kat][yy][xx]
+            if parsel is None or parsel.doku_id in {'GIRIS', 'CIKIS_SAHTE', 'CIKIS_KAPI', 'MERDIVEN_YUKARI', 'MERDIVEN_ASAGI'}:
+                continue
+            self.map_grid[kat][yy][xx] = ZeminDuz(xx, yy, kat)
+
+    def _omurga_baslangic_noktasi_sec(self):
+        ofset_x = random.randint(5, 6)
+        ofset_y = random.randint(-3, 3)
+        self.omurga_baslangic_x = min(HARITA_GENISLIK_PARSEL - 2, self.giris_x + ofset_x)
+        self.omurga_baslangic_y = max(1, min(HARITA_YUKSEKLIK_PARSEL - 2, self.giris_y + ofset_y))
+
     def _yol_oyu(self, kat, x1, y1, x2, y2):
         """İki nokta arasını YOL dokusuyla L-şekli izde kaplar. Merdiven/giriş/çıkış hücrelerini korur."""
         korunan = {'MERDIVEN_YUKARI', 'MERDIVEN_ASAGI', 'GIRIS', 'CIKIS_SAHTE', 'CIKIS_KAPI'}
@@ -829,7 +1099,9 @@ class HaritaYoneticisi:
         """Girişten çıkışa YOL dokusu çizer ve omurga_rota listesi hesaplar.
         Lider AI'nın katman geçişli yol takibi için kullanılır."""
         self.omurga_rota = []
-        cur_x, cur_y = self.giris_x, self.giris_y
+        self._omurga_baslangic_noktasi_sec()
+        self._giris_koridoru_ac(self.giris_katman, self.giris_x, self.giris_y, self.omurga_baslangic_x, self.omurga_baslangic_y)
+        cur_x, cur_y = self.omurga_baslangic_x, self.omurga_baslangic_y
 
         if self.giris_katman == self.cikis_katman:
             segman = self._omurga_rota_segment(self.giris_katman, cur_x, cur_y, self.cikis_x, self.cikis_y)
